@@ -247,30 +247,7 @@ BamRenderer.prototype.render = function (response, args) {
                     "cursor": "pointer"
                 });
 
-                //var rect = SVG.addChild(featureGroup,"rect",{
-                //"x":x+offset[strand],
-                //"y":rowY,
-                //"width":width-4,
-                //"height":settings.height,
-                //"stroke": "white",
-                //"stroke-width":1,
-                //"fill": color,
-                //"clip-path":"url(#"+_this.id+"cp)",
-                //"fill": 'url(#'+_this.id+'bamStrand'+strand+')',
-                //});
-                //readEls.push(rect);
-
                 if (diff != null && args.regionSize < 400) {
-                    //var	t = SVG.addChild(featureGroup,"text",{
-                    //"x":x+1,
-                    //"y":rowY+settings.height-1,
-                    //"fill":"darkred",
-                    //"textLength":width,
-                    //"cursor": "pointer"
-                    //});
-                    //t.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve");
-                    //t.textContent = diff;
-                    //readEls.push(t);
                     var path = SVG.addChild(featureGroup, "path", {
                         "d": Utils.genBamVariants(diff, args.pixelBase, x, rowY),
                         "fill": variantColor
@@ -284,12 +261,6 @@ BamRenderer.prototype.render = function (response, args) {
                     hide: 'click mouseleave'
                 });
 
-
-//                $(featureGroup).click(function (event) {
-//                    console.log(feature);
-//                    _this.trigger('feature:click', {query: feature[infoWidgetId], feature: feature, featureType: feature.featureType, clickEvent: event})
-////                    _this.showInfoWidget({query: feature[settings.infoWidgetId], feature: feature, featureType: feature.featureType, adapter: _this.trackData.adapter});
-//                });
                 break;
             }
             rowY += rowHeight;
@@ -462,12 +433,6 @@ BamRenderer.prototype.render = function (response, args) {
         for (var i = 0, li = chunkList.length; i < li; i++) {
             drawChunk(chunkList[i]);
         }
-//        var newHeight = Object.keys(this.renderedArea).length * 24;
-//        if (newHeight > 0) {
-//            this.setHeight(newHeight + /*margen entre tracks*/10 + 70);
-//        }
-        //TEST
-//        this.setHeight(200);
     }
     console.timeEnd("BamRender " + response.params.resource);
 };

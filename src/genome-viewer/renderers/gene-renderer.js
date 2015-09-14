@@ -64,8 +64,6 @@ GeneRenderer.prototype.render = function (features, args) {
         //transform to pixel position
         var width = length * args.pixelBase;
 
-
-//        var svgLabelWidth = _this.getLabelWidth(label, args);
         var svgLabelWidth = label.length * 6.4;
 
         //calculate x to draw svg rect
@@ -272,10 +270,6 @@ GeneRenderer.prototype.render = function (features, args) {
                                     codingStart = exonStart;
                                     codingEnd = exonEnd;
                                 }
-//									else{
-//										if(exonEnd < transcript.genomicCodingStart){
-//
-//									}
                             }
                             var coding = codingEnd - codingStart;
                             var codingX = args.pixelPosition + middle - ((args.position - codingStart) * args.pixelBase);

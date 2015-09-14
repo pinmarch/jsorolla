@@ -28,7 +28,6 @@ function HistogramRenderer(args) {
 
     //set default args
     this.histogramHeight = 75;
-//    this.multiplier = 7;
 
     this.maxValue = 10;
     if (args != null) {
@@ -72,7 +71,6 @@ HistogramRenderer.prototype.render = function (features, args) {
         var x = args.pixelPosition + middle - ((args.position - feature.start) * args.pixelBase);
 
         if (feature.features_count == null) {
-//            var height = Math.log(features[i].absolute);
             if (feature.absolute != 0) {
                 feature.features_count = Math.log(features[i].absolute);
             } else {
@@ -80,14 +78,7 @@ HistogramRenderer.prototype.render = function (features, args) {
             }
         }
 
-//        var height = features[i].features_count;
-//        if (height == null) {
-//            height = features[i].value;
-//            height = this.histogramHeight * height;
-//        } else {
-//        }
         var height = feature.features_count * this.multiplier;
-
 
         points += (x + (width / 2)) + "," + (this.histogramHeight - height) + " ";
 
@@ -97,7 +88,6 @@ HistogramRenderer.prototype.render = function (features, args) {
         var width = (lastFeature.end - lastFeature.start) * args.pixelBase;
         var x = args.pixelPosition + middle - ((args.position - parseInt(lastFeature.start)) * args.pixelBase);
         points += (x + (width / 2)) + ',' + this.histogramHeight + ' ';
-
     }
 
     var pol = SVG.addChild(args.svgCanvasFeatures, "polyline", {

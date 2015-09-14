@@ -52,5 +52,4 @@ Renderer.prototype = {
         $(svgLabel).remove();
         return svgLabelWidth;
     }
-}
-;
+};

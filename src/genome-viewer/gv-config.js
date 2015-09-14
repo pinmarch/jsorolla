@@ -243,34 +243,6 @@ FEATURE_TYPES = {
         height: 4,
         histogramColor: "lightblue"
     },
-//	geneorange:{
-//		getLabel: function(f){
-//			var str = "";
-//			str+= (f.strand < 0) ? "<" : "";
-//			str+= " "+f.name+" ";
-//			str+= (f.strand > 0) ? ">" : "";
-//			str+= " ["+f.biotype+"]";
-//			return str;
-//		},
-//		getTipTitle: function(f){
-//			return FEATURE_TYPES.formatTitle(f.featureType) +
-//			' - <span class="ok">'+f.name+'</span>';
-//		},
-//		getTipText: function(f){
-//			var color = GENE_BIOTYPE_COLORS[f.biotype];
-//			return	'Ensembl&nbsp;ID:&nbsp;<span class="ssel">'+f.id+'</span><br>'+
-//			'biotype:&nbsp;<span class="emph" style="color:'+color+';">'+f.biotype+'</span><br>'+
-//			'description:&nbsp;<span class="emph">'+f.description+'</span><br>'+
-//			FEATURE_TYPES.getTipCommons(f)+
-//			'source:&nbsp;<span class="ssel">'+f.source+'</span><br>';
-//		},
-//		getColor: function(f){
-//			return GENE_BIOTYPE_COLORS[f.biotype];
-//		},
-//		infoWidgetId: "id",
-//		height:4,
-//		histogramColor:"lightblue"
-//	},
     transcript: {
         label: function (f) {
             var name = (f.name != null) ? f.name : f.id;
@@ -346,8 +318,6 @@ FEATURE_TYPES = {
             return 'alleles:&nbsp;<span class="ssel">' + f.alleleString + '</span><br>' +
                 FEATURE_TYPES.getTipCommons(f) +
                 'conseq. type :&nbsp;<span class="ssel">' + f.displayConsequenceType + '</span><br>';
-//                'source:&nbsp;<span class="ssel">' + f.source + '</span><br>';
-
         },
         color: function (f) {
             return SNP_BIOTYPE_COLORS[f.displayConsequenceType];
