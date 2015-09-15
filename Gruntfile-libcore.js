@@ -3,7 +3,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         def: {
-            name: 'lib',
+            name: 'libcore',
             build: 'build/<%= pkg.version %>/<%= def.name %>'
         },
         concat: {
@@ -13,26 +13,8 @@ module.exports = function (grunt) {
                     'src/lib/utils.js',
                     'src/lib/svg.js',
                     'src/lib/region.js',
-                    'src/lib/grid.js',
                     'src/lib/feature-binary-search-tree.js',
-                    'src/lib/cellbase-manager.js',
-                    'src/lib/opencga-manager.js',
-                    'src/lib/ensembl-manager.js',
-
                     '!src/lib/worker-fileupload.js',
-
-                    //widgets
-                    'src/lib/widgets/feature/file/file-widget.js',
-                    'src/lib/widgets/feature/file/*.js',
-                    'src/lib/widgets/feature/info/info-widget.js',
-                    'src/lib/widgets/feature/info/*.js',
-
-                    'src/lib/widgets/network/network-file-widget.js',
-                    'src/lib/widgets/network/**/*.js',
-
-                    //opencga
-                    'src/lib/widgets/opencga/user-list-widget.js',
-                    'src/lib/widgets/**/*.js',
 
                     //network
                     'src/lib/network/**/*.js',

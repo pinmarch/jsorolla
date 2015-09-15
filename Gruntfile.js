@@ -2,8 +2,8 @@ module.exports = function (grunt) {
 
     grunt.initConfig({
         hub: {
-            lib: {
-                src: ['Gruntfile-lib.js'],
+            'lib': {
+                src: ['Gruntfile-libcore.js','Gruntfile-libcommon.js','Gruntfile-libwidgets.js'],
                 tasks: ['default']
             },
 

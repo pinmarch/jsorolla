@@ -10,7 +10,9 @@ module.exports = function (grunt) {
             dist: {
                 src: [
                     //lib must exists
-                    'build/<%= pkg.version %>/lib.js',
+                    'build/<%= pkg.version %>/libcommon.js',
+                    'build/<%= pkg.version %>/libcore.js',
+                    'build/<%= pkg.version %>/libwidgets.js',
 
                     'src/genome-viewer/navigation-bar.js',
                     'src/genome-viewer/chromosome-panel.js',
@@ -104,7 +106,7 @@ module.exports = function (grunt) {
         },
         hub: {
             lib: {
-                src: ['Gruntfile-lib.js'],
+                src: ['Gruntfile-libcore.js','Gruntfile-libcommon.js','Gruntfile-libwidgets.js'],
                 tasks: ['default']
             }
         }
