@@ -67,9 +67,6 @@ function upload(formData) {
     xhr.upload.addEventListener("abort", transferCanceled, false);
     // retrieve data unprocessed as a binary string
 
-//    xhr.setRequestHeader("Content-type", "application/json");
-//    xhr.overrideMimeType("text/plain; charset=x-user-defined");
-
     xhr.open('POST', getUrl(), false);//false indicates sync call
     xhr.send(formData);
 }
@@ -79,9 +76,6 @@ function getResumeInfo(formData) {
     xhr.open('POST', getUrl(), false);//false indicates sync call
     xhr.send(formData);
     return xhr.responseText;
-//    if (request.status === 200) {
-//        console.log(request.responseText);
-//    }
 }
 
 
@@ -160,97 +154,6 @@ self.onmessage = function(e) {
     res.finished = true;
     self.postMessage(res);
 };
-
-
-
-
-//fr.onload = function(evt) {
-//    $.ajax({
-//        type: "POST",
-//        url: "http://fsalavert:8080/opencga/rest/subir",
-//        data: {a:evt.target.result},
-//        success: function(data){console.log(data);},
-//        error:  function(data){console.log(data);},
-//    });
-//
-//};
-
-//fr = new FileReader();
-//x = f.slice(100,200)
-//fr.readAsBinaryString(x)
-
-
-
-
-
-//var file = [], p = true;
-//function upload(blobOrFile) {
-//    var xhr = new XMLHttpRequest();
-//    xhr.open('POST', '/server', false);
-//    xhr.onload = function(e) {
-//    };
-//    xhr.send(blobOrFile);
-//}
-//
-//function process() {
-//    for (var j = 0; j <file.length; j++) {
-//        var blob = file[j];
-//
-//        const BYTES_PER_CHUNK = 1024 * 1024;
-//        // 1MB chunk sizes.
-//        const SIZE = blob.size;
-//
-//        var start = 0;
-//        var end = BYTES_PER_CHUNK;
-//
-//        while (start < SIZE) {
-//
-//            if ('mozSlice' in blob) {
-//                var chunk = blob.mozSlice(start, end);
-//            } else {
-//                var chunk = blob.webkitSlice(start, end);
-//            }
-//
-//            upload(chunk);
-//
-//            start = end;
-//            end = start + BYTES_PER_CHUNK;
-//        }
-//        p = ( j = file.length - 1) ? true : false;
-//        self.postMessage(blob.name + " Uploaded Succesfully");
-//    }
-//}
-//
-//
-//self.onmessage = function(e) {
-//
-//    for (var j = 0; j < e.data.length; j++)
-//        files.push(e.data[j]);
-//
-//    if (p) {
-//        process()
-//    }
-//
-//}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ////////////
 ////////////
