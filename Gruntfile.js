@@ -1,6 +1,12 @@
 module.exports = function (grunt) {
 
     grunt.initConfig({
+        pkg: grunt.file.readJSON('package.json'),
+        def: {
+            name: 'jsorolla',
+            build: 'build/<%= pkg.version %>',
+        },
+
         hub: {
             'lib': {
                 src: ['Gruntfile-libcore.js','Gruntfile-libcommon.js','Gruntfile-libwidgets.js'],
@@ -43,13 +49,18 @@ module.exports = function (grunt) {
                 src: ['Gruntfile-threed-viewer.js'],
                 tasks: ['no-dep']
             }
+        },
+        clean: {
+            dist: ['<%= def.build %>/*']
         }
     })
 
     // These plugins provide necessary tasks.
     grunt.loadNpmTasks('grunt-hub');
+    grunt.loadNpmTasks('grunt-contrib-clean');
 
     grunt.registerTask('default', [
+        'clean',
         'hub:lib',
         'hub:genome-viewer-no-dep',
         'hub:circular-genome-viewer-no-dep',
@@ -57,8 +68,8 @@ module.exports = function (grunt) {
         'hub:threed-viewer-no-dep',
     ]);
 
-    grunt.registerTask('gv', ['hub:genome-viewer']);
-    grunt.registerTask('cgv', ['hub:circular-genome-viewer']);
-    grunt.registerTask('nv', ['hub:network-viewer']);
-    grunt.registerTask('3dv', ['hub:threed-viewer']);
+    grunt.registerTask('gv',  ['clean', 'hub:genome-viewer']);
+    grunt.registerTask('cgv', ['clean', 'hub:circular-genome-viewer']);
+    grunt.registerTask('nv',  ['clean', 'hub:network-viewer']);
+    grunt.registerTask('3dv', ['clean', 'hub:threed-viewer']);
 };

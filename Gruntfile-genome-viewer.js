@@ -106,7 +106,7 @@ module.exports = function (grunt) {
         },
         hub: {
             lib: {
-                src: ['Gruntfile-libcore.js','Gruntfile-libcommon.js','Gruntfile-libwidgets.js'],
+                src: ['Gruntfile-libcore.js','Gruntfile-libcommon.js'], //,'Gruntfile-libwidgets.js'],
                 tasks: ['default']
             }
         }
@@ -120,8 +120,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-html-build');
     grunt.loadNpmTasks('grunt-contrib-rename');
     grunt.loadNpmTasks('grunt-hub');
-
-    grunt.registerTask('vendor', ['curl-dir']);
 
     grunt.registerTask('default', ['hub:lib','clean', 'concat', 'uglify', 'copy', 'htmlbuild', 'rename']);
     grunt.registerTask('no-dep', ['clean', 'concat', 'uglify', 'copy', 'htmlbuild', 'rename']);
