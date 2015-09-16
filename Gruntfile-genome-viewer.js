@@ -27,7 +27,7 @@ module.exports = function (grunt) {
                     'src/genome-viewer/renderers/*-renderer.js',
 
 
-                    'src/genome-viewer/genome-viewer.js'
+                    'src/genome-viewer/genome-viewer-core.js'
 
                 ],
                 dest: '<%= def.build %>/<%= def.name %>.js'

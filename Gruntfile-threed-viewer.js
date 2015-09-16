@@ -10,14 +10,16 @@ module.exports = function (grunt) {
             dist: {
                 src: [
                     //lib must exists
-                    'build/<%= pkg.version %>/lib.js',
+                    'build/<%= pkg.version %>/libcommon.js',
+                    'build/<%= pkg.version %>/libcore.js',
+                    'build/<%= pkg.version %>/libwidgets.js',
 
                     'src/threed-viewer/js/chr.js',
                     'src/threed-viewer/js/3D.js',
                     'src/threed-viewer/js/torus.js',
                     'src/threed-viewer/js/main.js',
 
-                    'src/threed-viewer/threed-viewer.js'
+                    'src/threed-viewer/threed-viewer-core.js'
                 ],
                 dest: '<%= def.build %>/<%= def.name %>.js'
             }

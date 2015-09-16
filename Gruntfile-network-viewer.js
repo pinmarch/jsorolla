@@ -10,13 +10,15 @@ module.exports = function (grunt) {
             dist: {
                 src: [
                     //lib must exists
-                    'build/<%= pkg.version %>/lib.js',
+                    'build/<%= pkg.version %>/libcommon.js',
+                    'build/<%= pkg.version %>/libcore.js',
+                    'build/<%= pkg.version %>/libwidgets.js',
 
                     'src/network-viewer/tool-bar.js',
                     'src/network-viewer/edition-bar.js',
                     'src/network-viewer/network-svg-layout.js',
 
-                    'src/network-viewer/network-viewer.js'
+                    'src/network-viewer/network-viewer-core.js'
 
                 ],
                 dest: '<%= def.build %>/<%= def.name %>.js'

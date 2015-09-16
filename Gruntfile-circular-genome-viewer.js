@@ -10,13 +10,15 @@ module.exports = function (grunt) {
             dist: {
                 src: [
                     //lib must exists
-                    'build/<%= pkg.version %>/lib.js',
+                    'build/<%= pkg.version %>/libcommon.js',
+                    'build/<%= pkg.version %>/libcore.js',
+                    'build/<%= pkg.version %>/libwidgets.js',
 
                     'src/circular-genome-viewer/genome.js',
                     'src/circular-genome-viewer/circular-karyotype.js',
                     'src/circular-genome-viewer/circular-navigation-bar.js',
 
-                    'src/circular-genome-viewer/circular-genome-viewer.js'
+                    'src/circular-genome-viewer/circular-genome-viewer-core.js'
                 ],
                 dest: '<%= def.build %>/<%= def.name %>.js'
             }
