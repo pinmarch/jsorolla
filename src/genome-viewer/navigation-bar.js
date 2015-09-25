@@ -79,7 +79,6 @@ NavigationBar.prototype = {
             '       </ul>' +
             '   </div>' +
             '   <div class="btn-group">' +
-//            '       <div class="pull-left" style="height:22px;line-height: 22px;color:#708090">Chr&nbsp;</div>' +
             '       <button id="chromosomesButton" class="btn btn-default btn-xs custom-xs dropdown-toggle" data-toggle="dropdown"  type="button" >' +
             '           <span id="chromosomesText"></span>&nbsp;<span class="caret"></span>' +
             '       </button>' +
@@ -146,18 +145,6 @@ NavigationBar.prototype = {
             '       </div>' +
             '   </div>' +
             '   </div>' +
-
-//            '   <div class="btn-group pull-right">' +
-//            '       <div class="pull-left" style="height:22px;line-height: 22px;font-size:14px;">Search:&nbsp;</div>' +
-//            '       <div class="input-group pull-left">' +
-//            '           <input id="searchField" list="searchDataList" type="text" class="form-control" placeholder="gene, snp..." style="padding:0px 4px;height:22px;width:100px">' +
-//            '           <datalist id="searchDataList">' +
-//            '           </datalist>' +
-//            '       </div>' +
-////            '       <ul id="quickSearchMenu" class="dropdown-menu" role="menu">' +
-////            '       </ul>' +
-//            '       <button id="quickSearchButton" class="btn btn-default btn-xs" type="button"><span class="glyphicon glyphicon-search"></span></button>' +
-//            '   </div>' +
             '</div>' +
             '';
 
@@ -209,7 +196,6 @@ NavigationBar.prototype = {
         this.compactButton = $(this.div).find('#compactButton');
 
         this.searchField = $(this.div).find('#searchField')[0];
-//        this.quickSearchMenu = $(this.div).find('#quickSearchMenu')[0];
         this.searchDataList = $(this.div).find('#searchDataList')[0];
         this.quickSearchButton = $(this.div).find('#quickSearchButton')[0];
         this.windowSizeField = $(this.div).find('#windowSizeField')[0];
@@ -237,13 +223,16 @@ NavigationBar.prototype = {
 
 
         $(this.karyotypeButton).click(function () {
-            _this.trigger('karyotype-button:change', {selected: $(this).hasClass('active'), sender: _this});
+            $(this).toggleClass('panel-visible');
+            _this.trigger('karyotype-button:change', {selected: $(this).hasClass('panel-visible'), sender: _this});
         });
         $(this.chromosomeButton).click(function () {
-            _this.trigger('chromosome-button:change', {selected: $(this).hasClass('active'), sender: _this});
+            $(this).toggleClass('panel-visible');
+            _this.trigger('chromosome-button:change', {selected: $(this).hasClass('panel-visible'), sender: _this});
         });
         $(this.regionButton).click(function () {
-            _this.trigger('region-button:change', {selected: $(this).hasClass('active'), sender: _this});
+            $(this).toggleClass('panel-visible');
+            _this.trigger('region-button:change', {selected: $(this).hasClass('panel-visible'), sender: _this});
         });
 
 
@@ -255,8 +244,7 @@ NavigationBar.prototype = {
         });
         $(this.progressBarCont).click(function (e) {
             var offsetX = e.clientX - $(this).offset().left;
-            console.log('offsetX '+offsetX);
-            console.log('e.offsetX '+ e.offsetX);
+            console.log('offsetX', offsetX, 'e.offsetX', e.offsetX);
             var zoom = 100 / $(this).width() * offsetX;
             if (!_this.zoomChanging) {
                 $(_this.progressBar).width(offsetX);
@@ -295,43 +283,7 @@ NavigationBar.prototype = {
 
         $(this.compactButton).click(function (e) {
             _this.trigger('autoHeight-button:click', {clickEvent: e, sender: _this});
-            $(".ocb-compactable").toggle();
         });
-
-
-//        var speciesCode = Utils.getSpeciesCode(this.species.text).substr(0, 3);
-//        var url = CellBaseManager.url({
-//            host: 'http://ws.bioinfo.cipf.es/cellbase/rest',
-//            species: speciesCode,
-//            version: 'latest',
-//            category: 'feature',
-//            subCategory: 'id',
-//            query: '%QUERY',
-//            resource: 'starts_with',
-//            params: {
-//                of: 'json'
-//            }
-//        });
-
-//        $(this.div).find('#searchField').typeahead({
-//            remote: {
-//                url: url,
-//                filter: function (parsedResponse) {
-//                    return parsedResponse[0];
-//                }
-//            },
-//            valueKey: 'displayId',
-//            limit: 20
-//        }).bind('typeahead:selected', function (obj, datum) {
-//                _this._goFeature(datum.displayId);
-//            });
-//
-//        $(this.div).find('#searchField').parent().find('.tt-hint').addClass('form-control tt-query').css({
-//            height: '22px'
-//        });
-//        $(this.div).find('.tt-dropdown-menu').css({
-//            'font-size': '14px'
-//        });
 
         var lastQuery = '';
         $(this.searchField).bind("keyup", function (event) {

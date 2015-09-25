@@ -111,7 +111,7 @@ GenomeViewer.prototype = {
             return;
         }
 
-        this.div = $('<div class="bootstrap" id="' + this.id + '" class="ocb-gv ocb-box-vertical"></div>')[0];
+        this.div = $('<div class="bootstrap ocb-gv ocb-box-vertical" id="' + this.id + '"></div>')[0];
 
         if (this.border) {
             var border = (_.isString(this.border)) ? this.border : '1px solid lightgray';
@@ -134,30 +134,11 @@ GenomeViewer.prototype = {
         }
 
 
-//        if (typeof this.width === 'undefined') {
-//            var width = Math.max($(this.div).width(), $(this.targetDiv).width())
-//            if (width == 0) {
-//                console.log('target div width is zero');
-//                return
-//            }
-//            this.width = width;
-//        } else {
-//
-//        }
-//
-//        if (typeof this.height === 'undefined') {
-//
-//        } else {
-//        }
-
-
         this.navigationbarDiv = $('<div id="navigation-' + this.id + '" class="ocb-gv-navigation"></div>')[0];
-        $(this.div).append(this.navigationbarDiv);
-
         this.centerPanelDiv = $('<div id="center-' + this.id + '" class="ocb-gv-center"></div>')[0];
-        $(this.div).append(this.centerPanelDiv);
-
         this.statusbarDiv = $('<div id="statusbar-' + this.id + '" class="ocb-gv-status"></div>')[0];
+        $(this.div).append(this.navigationbarDiv);
+        $(this.div).append(this.centerPanelDiv);
         $(this.div).append(this.statusbarDiv);
 
 
@@ -168,18 +149,15 @@ GenomeViewer.prototype = {
 
 
         this.karyotypeDiv = $('<div id="karyotype-' + this.id + '"></div>')[0];
-        $(this.centerPanelDiv).append(this.karyotypeDiv);
-
         this.chromosomeDiv = $('<div id="chromosome-' + this.id + '"></div>')[0];
-        $(this.centerPanelDiv).append(this.chromosomeDiv);
-
         this.trackListPanelsDiv = $('<div id="trackListPanels-' + this.id + '" class="trackListPanels" ></div>')[0];
+        $(this.centerPanelDiv).append(this.karyotypeDiv);
+        $(this.centerPanelDiv).append(this.chromosomeDiv);
         $(this.centerPanelDiv).append(this.trackListPanelsDiv);
 
         this.regionDiv = $('<div id="region-' + this.id + '" ></div>')[0];
-        $(this.trackListPanelsDiv).append(this.regionDiv);
-
         this.tracksDiv = $('<div id="tracks-' + this.id + '" ></div>')[0];
+        $(this.trackListPanelsDiv).append(this.regionDiv);
         $(this.trackListPanelsDiv).append(this.tracksDiv);
 
 
@@ -207,13 +185,6 @@ GenomeViewer.prototype = {
                     }
                 }
             });
-//            $(this.targetDiv).resizable({
-//                handles: 'e',
-//                ghost: true,
-//                stop: function (event, ui) {
-//                    _this._setWidth($(_this.targetDiv).width());
-//                }
-//            });
         }
 
         /* Navigation Bar */
@@ -221,7 +192,6 @@ GenomeViewer.prototype = {
             this.navigationBar = this._createNavigationBar(this.navigationbarDiv);
             this.navigationBar.setZoom(this.zoom);
         }
-
 
         /*karyotype Panel*/
         if (this.drawKaryotypePanel) {
@@ -363,7 +333,15 @@ GenomeViewer.prototype = {
 
         var goFeature = function (featureName) {
             if (featureName != null) {
-                if (featureName.slice(0, "rs".length) == "rs" || featureName.slice(0, "AFFY_".length) == "AFFY_" || featureName.slice(0, "SNP_".length) == "SNP_" || featureName.slice(0, "VAR_".length) == "VAR_" || featureName.slice(0, "CRTAP_".length) == "CRTAP_" || featureName.slice(0, "FKBP10_".length) == "FKBP10_" || featureName.slice(0, "LEPRE1_".length) == "LEPRE1_" || featureName.slice(0, "PPIB_".length) == "PPIB_") {
+                if (featureName.slice(0, "rs".length) == "rs" ||
+                    featureName.slice(0, "AFFY_".length) == "AFFY_" ||
+                    featureName.slice(0, "SNP_".length) == "SNP_" ||
+                    featureName.slice(0, "VAR_".length) == "VAR_" ||
+                    featureName.slice(0, "CRTAP_".length) == "CRTAP_" ||
+                    featureName.slice(0, "FKBP10_".length) == "FKBP10_" ||
+                    featureName.slice(0, "LEPRE1_".length) == "LEPRE1_" ||
+                    featureName.slice(0, "PPIB_".length) == "PPIB_") {
+
                     this.openSNPListWidget(featureName);
                 } else {
                     console.log(featureName);
@@ -470,9 +448,7 @@ GenomeViewer.prototype = {
         });
 
         this.on('region:change', function (event) {
-//            if (event.sender != navigationBar) {
             _this.navigationBar.setRegion(event.region);
-//            }
             _this.zoom = _this._calculateZoomByRegion(event.region);
             _this.navigationBar.setZoom(_this.zoom);
         });
@@ -711,17 +687,9 @@ GenomeViewer.prototype = {
             return true;
         };
         if (checkAllTrackListStatus('ready')) {
-//            console.log('-------------all tracklist ready')
+            console.log('-- all tracklist ready --')
             _this.trigger('tracks:ready', {sender: _this});
         }
-//        var checkStatus = function () {
-//            if (checkAllTrackStatus('ready')) {
-//                _this.trigger('tracks:ready', {sender: _this});
-//            } else {
-//                setTimeout(checkStatus, 100);
-//            }
-//        };
-//        setTimeout(checkStatus, 10);
     },
 
     getRightSidePanelId: function () {
@@ -816,7 +784,7 @@ GenomeViewer.prototype = {
         var start = Math.floor(centerPosition - aux);
         var end = Math.floor(centerPosition + aux);
 
-        return {start: start, end: end};
+        return {chromosome: this.region.chromosome, start: start, end: end};
     },
     _calculateZoomByRegion: function (region) {
         var minNtPixels = 10; // 10 is the minimum pixels per nt
