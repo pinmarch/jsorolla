@@ -56,9 +56,11 @@ function KaryotypePanel(args) {
 KaryotypePanel.prototype = {
     show: function () {
         $(this.div).css({display: 'block'});
+        this.trigger('karyotypePanel:show', {sender: this});
     },
     hide: function () {
         $(this.div).css({display: 'none'});
+        this.trigger('karyotypePanel:hide', {sender: this});
     },
     showContent: function () {
         $(this.svg).css({display: 'inline'});
@@ -76,9 +78,9 @@ KaryotypePanel.prototype = {
     },
     setVisible: function (bool) {
         if (bool) {
-            $(this.div).css({display: 'block'});
+            this.show();
         } else {
-            $(this.div).css({display: 'none'});
+            this.hide();
         }
     },
     setTitle: function (title) {

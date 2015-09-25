@@ -54,9 +54,11 @@ function ChromosomePanel(args) {
 ChromosomePanel.prototype = {
     show: function () {
         $(this.div).css({display: 'block'});
+        this.trigger('chromosomePanel:show', {sender: this});
     },
     hide: function () {
         $(this.div).css({display: 'none'});
+        this.trigger('chromosomePanel:hide', {sender: this});
     },
     showContent: function () {
         $(this.svg).css({display: 'inline'});
@@ -74,9 +76,9 @@ ChromosomePanel.prototype = {
     },
     setVisible: function (bool) {
         if (bool) {
-            $(this.div).css({display: 'block'});
+            this.show();
         } else {
-            $(this.div).css({display: 'none'});
+            this.hide();
         }
     },
     setTitle: function (title) {
