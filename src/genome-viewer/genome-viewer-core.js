@@ -111,7 +111,7 @@ GenomeViewer.prototype = {
             return;
         }
 
-        this.div = $('<div class="bootstrap ocb-gv ocb-box-vertical" id="' + this.id + '"></div>')[0];
+        this.div = $('<div class="bootstrap" id="' + this.id + '"></div>')[0];
 
         if (this.border) {
             var border = (_.isString(this.border)) ? this.border : '1px solid lightgray';

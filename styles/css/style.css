@@ -1,6 +1,5 @@
 .jso-white-background{
     background-color: white;
-    background: white;
 }
 
 .ocb-font-default {
@@ -109,76 +108,13 @@
     width: 120px;
 }
 
-/*Google-like scrollbars webkit only*/
-/*::-webkit-scrollbar {*/
-/*width: 10px;*/
-/*}*/
-/*::-webkit-scrollbar-track {*/
-/*background: #FFF;*/
-/*-webkit-box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1);*/
-/*}*/
-/*::-webkit-scrollbar-thumb {*/
-/*background: #CCC;*/
-/*-webkit-box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);*/
-/*}*/
-/*::-webkit-scrollbar-thumb:hover {*/
-/*background: #AAA;*/
-/*}*/
-/*::-webkit-scrollbar-thumb:active {*/
-/*background: #888;*/
-/*-webkit-box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3);*/
-/*}*/
-
-/*Genome viewer Layout*/
-/*.ocb-box-vertical{*/
-/*display : box;*/
-/*display : -moz-box;*/
-/*display : -webkit-box;*/
-
-/*box-orient : vertical;*/
-/*-moz-box-orient : vertical;*/
-/*-webkit-box-orient : vertical;*/
-/*}*/
-.ocb-gv {
-    position: relative;
-    background-color: white;
-}
-
-/*.ocb-gv-navigation{*/
-/*height:37px;*/
-/*}*/
-/*.ocb-gv-center{*/
-/*position:relative;*/
-/*height:100%*/
-
-/*box-flex:1;*/
-/*-moz-box-flex:1;*/
-/*-webkit-box-flex:1;*/
-/*overflow-y: scroll;*/
-/*overflow-x: hidden;*/
-/*}*/
-/*.ocb-gv-status{*/
-/*height:25px;*/
-/*}*/
-
-/*.ocb-tlp-tracks{*/
-/*position: relative;*/
-/*z-index: 3;*/
-/*box-flex:1;*/
-/*-moz-box-flex:1;*/
-/*-webkit-box-flex:1;*/
-/*overflow-y: scroll;*/
-/*overflow-x: hidden;*/
-/*}*/
-
-/*END Genome viewer Layout*/
 
 .ocb-track-resize {
     background-color: lightgray;
     background-image: url(../img/ocb-grab-track-resize.png) !important;
     background-repeat: no-repeat;
     background-position: center;
-    height: 7px;
+    height: 5px;
     opacity: 0.3;
     border-top: 1px solid gray;
     border-bottom: 1px solid gray;
@@ -189,37 +125,12 @@
     fill: yellow;
 }
 
-/*.x-custom-button-over{*/
-/*background-color: lightgray;*/
-/*background-image: none;*/
-/*border-color: green;*/
-/*}*/
-
-/*.x-custom-button-pressed{*/
-/*background-color: lightgray;*/
-/*background-image: none;*/
-/*border-color: red;*/
-/*}*/
-
 .gv-navigation-bar {
     font-size: 10px;
     background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
     background-image: -webkit-linear-gradient(top, #ffffff, #f2f2f2);
     background-repeat: repeat-x;
     padding: 5px;
-}
-
-.gm-navigation-bar {
-    background-image: linear-gradient(to bottom, #ffffff, #eeeeee);
-    background-image: -webkit-linear-gradient(top, #ffffff, #eeeeee);
-    background-repeat: repeat-x;
-}
-
-.gm-login-bar {
-    background: white;
-    /*background-image: linear-gradient(to top, #ffffff, #f2f2f2);*/
-    /*background-image: -webkit-linear-gradient(bottom, white, #f2f2f2);*/
-    /*background-repeat: repeat-x;*/
 }
 
 .gv-status-bar {
@@ -258,6 +169,17 @@
     border-bottom: 1px solid #d4d4d4;
 }
 
+
+.gm-navigation-bar {
+    background-image: linear-gradient(to bottom, #ffffff, #eeeeee);
+    background-image: -webkit-linear-gradient(top, #ffffff, #eeeeee);
+    background-repeat: repeat-x;
+}
+
+.gm-login-bar {
+    background: white;
+}
+
 .nv-toolbar {
     background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
     background-image: -webkit-linear-gradient(top, white, #f2f2f2);
@@ -274,14 +196,7 @@
     background-color: darkred;
 }
 
-/* .x-toolbar-default { */
-/* border-color: #99BCE8; */
-/* background-image: none; */
-/* background-color: #D3E1F1; */
-/* background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dfe9f5), color-stop(100%, #d3e1f1)); */
-/* background-image: -moz-linear-gradient(top, #dfe9f5,#d3e1f1); */
-/* background-image: linear-gradient(top, #dfe9f5,#d3e1f1); */
-/* } */
+
 a:link {
     text-decoration: none;
     color: #15428B;
@@ -1133,17 +1048,6 @@ a:hover {
 }
 
 
-
-/*GridFilters Styles*/
-/*.ux-filtered-column {*/
-    /*font-style: italic;*/
-    /*font-weight: bold;*/
-/*}*/
-
-/*.ux-gridfilter-text-icon {*/
-    /*background-image: url(../img/find.png) !important;*/
-/*}*/
-
 /*RangeMenu Styles*/
 .ux-rangemenu-icon {
     margin-top: 0;
@@ -1161,31 +1065,6 @@ a:hover {
     background-image: url(../img/equals.png) !important;
 }
 
-/********************/
-/***Sencha rewrite***/
-/********************/
-/*.x-toolbar .x-toolbar-separator-horizontal {*/
-    /*border-left-color: #bbb;*/
-/*}*/
-
-/*EXTJS 4.2 BUG FIX FOR TOOLTIPS*/
-/*.x-tip {*/
-    /*width: auto !important;*/
-/*}*/
-
-/*.x-tip-body {*/
-    /*width: auto !important;*/
-/*}*/
-
-/*.x-tip-body span {*/
-    /*width: auto !important;*/
-/*}*/
-
-/*@import url(http://fonts.googleapis.com/css?family=Ubuntu+Mono);*/
-/*@import url(http://fonts.googleapis.com/css?family=Ubuntu);*/
-/*@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro);*/
-/*@import url(http://fonts.googleapis.com/css?family=Oxygen);*/
-/*@import url(http://fonts.googleapis.com/css?family=Lato);*/
 
 @font-face {
     font-family: 'Ubuntu';
@@ -1225,12 +1104,6 @@ a:hover {
 .bootstrap {
     font-family: 'Source Sans Pro' !important;
 }
-
-/*.bootstrap * {*/
-    /*-webkit-border-radius: 0px !important;*/
-    /*-moz-border-radius: 0px !important;*/
-    /*border-radius: 0px !important;*/
-/*}*/
 
 .jso-vertex-selected * {
     stroke: #00FF00;
