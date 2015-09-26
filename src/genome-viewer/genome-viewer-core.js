@@ -125,8 +125,7 @@ GenomeViewer.prototype = {
                 this.width = $('body').width();
             }
         }
-        $(this.div).width(this.width);
-        $(this.targetDiv).width(this.width);
+        this.setWidth(this.width);
 
         if (typeof this.height !== 'undefined') {
             $(this.div).height(this.height);
@@ -168,7 +167,6 @@ GenomeViewer.prototype = {
 
         this.chromosomes = this.getChromosomes();
 
-        this._setWidth(this.width);
         this.setMinRegion(this.region, this.getSVGCanvasWidth());
         this.zoom = this._calculateZoomByRegion(this.region);
 
@@ -178,8 +176,8 @@ GenomeViewer.prototype = {
                 if (event.target == window) {
                     if (!_this.resizing) {//avoid multiple resize events
                         _this.resizing = true;
-                        _this._setWidth($(_this.targetDiv).width());
                         setTimeout(function () {
+                            _this.setWidth($(_this.targetDiv).width());
                             _this.resizing = false;
                         }, 400);
                     }
@@ -722,6 +720,7 @@ GenomeViewer.prototype = {
     },
     setWidth: function (width) {
         $(this.div).width(width);
+        $(this.targetDiv).width(width);
         this._setWidth(width);
     },
     getSVGCanvasWidth: function () {
