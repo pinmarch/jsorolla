@@ -170,6 +170,18 @@
 }
 
 
+.gvtrack-titlebardiv {
+    position: absolute;
+    padding: 4px;
+}
+
+.gvtrack-svgdiv {
+    z-index: 3;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+
 .gm-navigation-bar {
     background-image: linear-gradient(to bottom, #ffffff, #eeeeee);
     background-image: -webkit-linear-gradient(top, #ffffff, #eeeeee);

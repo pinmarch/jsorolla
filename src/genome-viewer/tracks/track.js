@@ -20,6 +20,10 @@
  */
 
 function Track(args) {
+
+    // Using Underscore 'extend' function to extend and add Backbone Events
+    _.extend(this, Backbone.Events);
+
     this.width = 200;
     this.height = 200;
 
@@ -29,10 +33,10 @@ function Track(args) {
     this.resizable = true;
     this.autoHeight = false;
     this.targetId;
-    this.id;
+    this.id = Utils.genId("Track");
     this.title;
-    this.minHistogramRegionSize = 300000000;
-    this.maxLabelRegionSize = 300000000;
+    this.minHistogramRegionSize = 300000000; // 300Mnt
+    this.maxLabelRegionSize = 300000000; // 300Mnt
     this.height = 100;
     this.visibleRegionSize;
     this.fontClass = 'ocb-font-sourcesanspro ocb-font-size-14';
@@ -76,32 +80,49 @@ Track.prototype = {
     get: function (attr) {
         return this[attr];
     },
-
     set: function (attr, value) {
         this[attr] = value;
     },
     hide: function () {
-        $(this.div).css({display: 'hidden'});
+        $(this.div).css({display: 'none'});
+        this.trigger('track:hide', {sender: this});
     },
     show: function () {
-        $(this.div).css({display: 'auto'});
+        $(this.div).css({display: 'inherit'});
+        this.trigger('track:show', {sender: this});
     },
-    hideContent: function () {
-        $(this.svgdiv).css({display: 'hidden'});
-        $(this.titlediv).css({display: 'hidden'});
+    hideContent: function (completely) {
+        $(this.svgdiv).css({display: 'none'});
+        if (completely) {
+            $(this.titlediv).css({display: 'none'});
+        } else {
+            $(this.resizeDiv).css({display: 'none'});
+            $(this.configBtn).css({display: 'none'});
+        }
+        this.trigger('track:hideContent', {sender: this});
     },
-    showContent: function () {
-        $(this.svgdiv).css({display: 'auto'});
-        $(this.titlediv).css({display: 'auto'});
+    showContent: function (completely) {
+        $(this.svgdiv).css({display: 'inherit'});
+        if (completely) {
+            $(this.titlediv).css({display: 'inherit'});
+        } else {
+            $(this.resizeDiv).css({display: 'inherit'});
+            $(this.configBtn).css({display: 'inherit'});
+        }
+        this.trigger('track:showContent', {sender: this});
     },
     toggleContent: function () {
-        $(this.svgdiv).toggle('hidden');
-        $(this.resizeDiv).toggle('hidden');
-        $(this.configBtn).toggle('hidden');
+        var hidden = $(this.svgdiv).css('display') == 'none';
+        if (hidden) {
+            this.showContent();
+        } else {
+            this.hideContent();
+        }
     },
     setSpecies: function (species) {
         this.species = species;
         this.dataAdapter.species = this.species
+        this.trigger('track:speciesChanged', {sender: this});
     },
 
     setWidth: function (width) {
@@ -109,19 +130,6 @@ Track.prototype = {
         this.main.setAttribute("width", width);
     },
     _updateDIVHeight: function () {
-//        $(this.rrr).remove();
-//        delete this.rrr;
-//        this.rrr = SVG.addChild(this.svgCanvasFeatures, "rect", {
-//            'x': 0,
-//            'y': 0,
-//            'width': 0,
-//            'height': 18,
-//            'stroke': '#3B0B0B',
-//            'stroke-width': 1,
-//            'stroke-opacity': 1,
-//            'fill': 'black',
-//            'cursor': 'pointer'
-//        });
         if (this.resizable) {
             if (this.histogram) {
                 $(this.svgdiv).css({'height': this.height + 10});
@@ -136,9 +144,6 @@ Track.prototype = {
                 }
                 var divHeight = parseInt(lastContains) + 20;
                 $(this.svgdiv).css({'height': divHeight + 25});
-//                this.rrr.setAttribute('x', x);
-//                this.rrr.setAttribute('y', divHeight);
-//                this.rrr.setAttribute('width', width);
             }
         }
     },
@@ -155,6 +160,7 @@ Track.prototype = {
         if (this.autoHeight || ignoreAutoHeight) {
             this._updateDIVHeight();
         }
+        this.trigger('track:updateHeight', {sender: this});
     },
     enableAutoHeight: function () {
         this.autoHeight = true;
@@ -187,22 +193,12 @@ Track.prototype = {
             this.histogramMax = undefined;
             this.interval = undefined;
         }
-
-//        if (this.histogramRenderer) {
-//            if (this.zoom <= this.histogramZoom) {
-//                this.histogramGroup.setAttribute('visibility', 'visible');
-//            } else {
-//                this.histogramGroup.setAttribute('visibility', 'hidden');
-//            }
-//        }
     },
 
     cleanSvg: function (filters) {//clean
-//        console.time("-----------------------------------------empty");
         while (this.svgCanvasFeatures.firstChild) {
             this.svgCanvasFeatures.removeChild(this.svgCanvasFeatures.firstChild);
         }
-//        console.timeEnd("-----------------------------------------empty");
         this.chunksDisplayed = {};
         this.renderedArea = {};
     },
@@ -211,24 +207,25 @@ Track.prototype = {
 
         var _this = this;
         var div = $('<div id="' + this.id + '-div"></div>')[0];
-        var titleBardiv = $('' +
-            '<div>' +
-            '   <div class="btn-group btn-group-xs">' +
-            '   <button id="configBtn" type="button" class="btn btn-xs btn-primary"><span class="glyphicon glyphicon-cog"></span></button>' +
-            '   <button id="titleBtn" type="button" class="btn btn-xs btn-default" data-toggle="button"><span id="titleDiv">' + this.title + '</span></button>' +
-            '   </div>' +
+        var titleBardiv = $(
+            '<div class="gvtrack-titlebardiv">' +
+            '<div class="btn-group btn-group-xs">' +
+            '<button id="' + this.id + 'configBtn" type="button" class="gvtrack-config-btn btn btn-xs btn-primary">' +
+            '<span class="glyphicon glyphicon-cog"></span></button>' +
+            '<button id="' + this.id + 'titleBtn" type="button" class="gvtrack-title-btn btn btn-xs btn-default" data-toggle="button">' +
+            '<span id="' + this.id + 'titleDiv" class="gvtrack-title-div">' + this.title + '</span></button>' +
+            '</div>' +
             '</div>')[0];
 
         if (_.isUndefined(this.title)) {
             $(titleBardiv).addClass("hidden");
         }
 
-        var titlediv = $(titleBardiv).find('#titleDiv')[0];
-        var titleBtn = $(titleBardiv).find('#titleBtn')[0];
-        var configBtn = $(titleBardiv).find('#configBtn')[0];
+        var titlediv = $(titleBardiv).find('.gvtrack-title-div')[0];
+        var titleBtn = $(titleBardiv).find('.gvtrack-title-btn')[0];
+        var configBtn = $(titleBardiv).find('.gvtrack-config-btn')[0];
 
-
-        var svgdiv = $('<div id="' + this.id + '-svgdiv"></div>')[0];
+        var svgdiv = $('<div id="' + this.id + '-svgdiv" class="gvtrack-svgdiv"></div>')[0];
         var resizediv = $('<div id="' + this.id + '-resizediv" class="ocb-track-resize"></div>')[0];
 
         $(targetId).addClass("unselectable");
@@ -239,21 +236,15 @@ Track.prototype = {
 
 
         /** title div **/
-        $(titleBardiv).css({'padding': '4px'})
-            .on('dblclick', function (e) {
-                e.stopPropagation();
-            });
+        $(titleBardiv).on('dblclick', function (e) {
+            e.stopPropagation();
+        });
         $(titleBtn).click(function (e) {
             _this.toggleContent();
         });
 
         /** svg div **/
-        $(svgdiv).css({
-            'z-index': 3,
-            'height': this.height,
-            'overflow-y': (this.resizable) ? 'auto' : 'hidden',
-            'overflow-x': 'hidden'
-        });
+        $(svgdiv).css({'height': this.height});
 
         var main = SVG.addChild(svgdiv, 'svg', {
             'id': this.id,
@@ -345,7 +336,8 @@ Track.prototype = {
         this.invalidZoomText.textContent = "Zoom in to view the sequence";
 
 
-        var loadingImg = '<?xml version="1.0" encoding="utf-8"?>' +
+        var loadingImg =
+            '<?xml version="1.0" encoding="utf-8"?>' +
             '<svg version="1.1" width="22px" height="22px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
             '<defs>' +
             '<g id="pair">' +
@@ -381,16 +373,9 @@ Track.prototype = {
 
         this.main = main;
         this.hoverRect = hoverRect;
-//        this.titleText = titleText;
-
-
-//        if (this.histogramRenderer) {
-//            this._drawHistogramLegend();
-//        }
 
         this.rendered = true;
         this.status = "ready";
-
     },
     _drawHistogramLegend: function () {
         var histogramHeight = this.histogramRenderer.histogramHeight;
@@ -437,43 +422,9 @@ Track.prototype = {
         });
         text.textContent = "1000-";
     },
-
-//    showInfoWidget: function (args) {
-//        if (this.dataAdapter.species == "orange") {
-//            //data.resource+="orange";
-//            if (args.featureType.indexOf("gene") != -1)
-//                args.featureType = "geneorange";
-//            if (args.featureType.indexOf("transcript") != -1)
-//                args.featureType = "transcriptorange";
-//        }
-//        switch (args.featureType) {
-//            case "gene":
-//                new GeneInfoWidget(null, this.dataAdapter.species).draw(args);
-//                break;
-//            case "geneorange":
-//                new GeneOrangeInfoWidget(null, this.dataAdapter.species).draw(args);
-//                break;
-//            case "transcriptorange":
-//                new TranscriptOrangeInfoWidget(null, this.dataAdapter.species).draw(args);
-//                break;
-//            case "transcript":
-//                new TranscriptInfoWidget(null, this.dataAdapter.species).draw(args);
-//                break;
-//            case "snp" :
-//                new SnpInfoWidget(null, this.dataAdapter.species).draw(args);
-//                break;
-//            case "vcf" :
-//                new VCFVariantInfoWidget(null, this.dataAdapter.species).draw(args);
-//                break;
-//            default:
-//                break;
-//        }
-//    },
-
     draw: function () {
 
     },
-
     getFeaturesToRenderByChunk: function (response, filters) {
         //Returns an array avoiding already drawn features in this.chunksDisplayed
 
@@ -507,17 +458,6 @@ Track.prototype = {
                         }
                     }
                     if (!displayed) {
-                        //apply filter
-                        // if(filters != null) {
-                        //		var pass = true;
-                        // 		for(filter in filters) {
-                        // 			pass = pass && filters[filter](feature);
-                        //			if(pass == false) {
-                        //				break;
-                        //			}
-                        // 		}
-                        //		if(pass) features.push(feature);
-                        // } else {
                         features.push(feature);
                     }
                 }
