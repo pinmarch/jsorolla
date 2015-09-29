@@ -343,6 +343,7 @@ TrackListPanel.prototype = {
                                     end: _this.region.end - disp
                                 });
                                 _this.moveRegion({region: newregion, disp: disp, sender: _this});
+                                _this.trigger('region:move', {region: newregion, disp: disp, sender: _this});
                                 lastX = newX;
                                 _this.setNucleotidPosition(p);
                             }
@@ -461,6 +462,7 @@ TrackListPanel.prototype = {
                         end: _this.region.end - disp
                     });
                     _this.moveRegion({region: newregion, disp: disp, sender: _this});
+                    _this.trigger('region:move', {region: newregion, disp: disp, sender: _this});
                 }
             });
         };
@@ -472,7 +474,9 @@ TrackListPanel.prototype = {
     },
 
     setHeight: function (height) {
+
     },
+
     setWidth: function (width) {
         console.log(width);
         this.width = width - 18;
@@ -510,7 +514,6 @@ TrackListPanel.prototype = {
     moveRegion: function (event) {
         this._updateRegion(event.region);
         this.trigger('trackRegion:move', event);
-        this.trigger('region:move', event);
     },
     setRegion: function (region) {//item.chromosome, item.position, item.species
         var _this = this;
@@ -523,7 +526,8 @@ TrackListPanel.prototype = {
 
         this.trigger('window:size', {windowSize: this.windowSize});
         this.trigger('trackRegion:change', {region: this.visualRegion, sender: this})
-        this.trigger('region:change', {region: this.visualRegion, sender: this})
+        // this.trigger('region:change', {region: this.region, sender: this})
+        console.log("TrackListPanel::setRegion", this.id, this.region.toString(), this.visualRegion.toString());
 
         this.nucleotidText.textContent = "";//remove base char, will be drawn later if needed
 
@@ -533,6 +537,7 @@ TrackListPanel.prototype = {
     draw: function () {
         this.trigger('track:draw', {sender: this});
     },
+
     checkTracksReady: function () {
         var _this = this;
 
@@ -547,6 +552,7 @@ TrackListPanel.prototype = {
             this.trigger('tracks:ready', {sender: this});
         }
     },
+
     addTrack: function (track) {
         if (_.isArray(track)) {
             for (var i in track) {
@@ -556,6 +562,7 @@ TrackListPanel.prototype = {
             this._addTrack(track);
         }
     },
+
     _addTrack: function (track) {
         if (!this.rendered) {
             console.info(this.id + ' is not rendered yet');
@@ -579,17 +586,14 @@ TrackListPanel.prototype = {
         // Once tack has been initialize we can call draw() function
         track.draw();
 
-
         //trackEvents
         track.set('track:draw', function (event) {
             track.draw();
         });
 
-
         track.set('trackSpecies:change', function (event) {
             track.setSpecies(event.species);
         });
-
 
         track.set('trackRegion:change', function (event) {
             track.set('region', event.region);
@@ -597,20 +601,17 @@ TrackListPanel.prototype = {
             track.draw();
         });
 
-
         track.set('trackRegion:move', function (event) {
             track.set('region', event.region);
             track.set('pixelBase', _this.pixelBase);
             track.move(event.disp);
         });
 
-
         track.set('trackWidth:change', function (event) {
             track.setWidth(event.width);
             track.set('pixelBase', _this.pixelBase);
             track.draw();
         });
-
 
         track.set('trackFeature:highlight', function (event) {
             var attrName = event.attrName || 'feature_id';
@@ -694,6 +695,7 @@ TrackListPanel.prototype = {
             track.enableAutoHeight();
         }
     },
+
     updateHeight: function () {
         for (var i = 0; i < this.trackSvgList.length; i++) {
             var track = this.trackSvgList[i];
@@ -804,8 +806,7 @@ TrackListPanel.prototype = {
     },
 
     _setPixelBase: function () {
-        this.pixelBase = this.width / this.region.length();
-        this.pixelBase = this.pixelBase / this.zoomMultiplier;
+        this.pixelBase = (this.width / this.region.length()) / this.zoomMultiplier;
         this.halfVirtualBase = (this.width * 3 / 2) / this.pixelBase;
     },
 
@@ -833,6 +834,7 @@ TrackListPanel.prototype = {
         }
         return null;
     },
+
     getSequenceTrack: function () {
         //if multiple, returns the first found
         for (var i = 0; i < this.trackSvgList.length; i++) {

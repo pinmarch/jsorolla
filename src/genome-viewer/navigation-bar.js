@@ -264,12 +264,11 @@ NavigationBar.prototype = {
             if (event.which === 13 && pattern.test(value)) {
                 var regionSize = parseInt(value),
                     haflRegionSize = Math.floor(regionSize / 2),
-                    start = _this.region.center() - haflRegionSize,
-                    end = _this.region.center() + haflRegionSize,
+                    center = _this.region.center(),
                     newregion = new Region({
                         chromosome: _this.region.chromosome,
-                        start: start,
-                        end: end
+                        start: center - haflRegionSize,
+                        end: center + haflRegionSize
                     });
                 _this._handleSetRegion(newregion);
             }
@@ -333,8 +332,7 @@ NavigationBar.prototype = {
         if (menu.find('li[data-region="' + strRgn + '"]').length == 0) {
             menu.prepend(menuEntry);
             $(menuEntry).click(function () {
-                var region = new Region($(this).text());
-                _this.setRegion(region);
+                _this._goRegion($(this).text());
             });
         }
     },
@@ -431,7 +429,7 @@ NavigationBar.prototype = {
         this._handleZoomSlider(Math.max(0, this.zoom - 2));
     },
     _handleZoomSlider: function (value) {
-        this.zoom = value;
+        this.setZoom(value);
         this.trigger('zoom:change', {zoom: this.zoom, sender: this});
     },
     _handleZoomInButton: function () {
@@ -467,7 +465,6 @@ NavigationBar.prototype = {
         this.region.load(region);
         $(this.chromosomesText).text(region.chromosome);
         $(this.regionField).val(region.toString());
-        console.log("New region:", region.toString());
     },
 
     setZoom: function (zoom) {
