@@ -21,9 +21,9 @@
 
 function Region(args) {
 
-    this.chromosome = null;
-    this.start = null;
-    this.end = null;
+    this.chromosome;
+    this.start;
+    this.end;
 
     if (_.isObject(args)) {
         this.load(args);
@@ -37,8 +37,9 @@ Region.prototype = {
         if (_.isString(obj)) {
             return this.parse(obj);
         }
-        this.chromosome = obj.chromosome || this.chromosome;
+
         this.chromosome = this.chromosome;
+        if (!_.isUndefined(obj.chromosome)) { this.chromosome = obj.chromosome; }
 
         (_.isUndefined(obj.start)) ? this.start = parseInt(this.start) : this.start = parseInt(obj.start);
         (_.isUndefined(obj.end)) ? this.end = parseInt(this.end) : this.end = parseInt(obj.end);
@@ -84,7 +85,11 @@ Region.prototype = {
             str = this.chromosome + ":" + this.start + "-" + this.end;
         }
         return str;
+    },
+
+    equalsTo: function (region) {
+        return region.chromosome == this.chromosome &&
+               region.start == this.start &&
+               region.end == this.end;
     }
 };
-
-

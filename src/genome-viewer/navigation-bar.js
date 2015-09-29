@@ -31,6 +31,7 @@ function NavigationBar(args) {
     this.species = 'Homo sapiens';
     this.increment = 3;
     this.componentsConfig = 3;
+    this.handlers = {};
 
     //set instantiation args, must be last
     _.extend(this, args);
@@ -211,8 +212,8 @@ NavigationBar.prototype = {
         /*****/
 
         /*** ***/
-        $(this.restoreDefaultRegionButton).click(function (e) {
-            _this.trigger('restoreDefaultRegion:click', {clickEvent: e, sender: {}})
+        $(this.restoreDefaultRegionButton).click(function () {
+            _this.trigger('restoreDefaultRegion:click', {sender: _this});
         });
 
         this._addRegionHistoryMenuItem(this.region);
@@ -255,8 +256,26 @@ NavigationBar.prototype = {
                 }, 500);
             }
         });
-        $(this.regionField).val(this.region.toString());
 
+        $(this.windowSizeField).val(this.region.length());
+        $(this.windowSizeField).bind("keyup", function (event) {
+            var value = $(this).val();
+            var pattern = /^([0-9])+$/;
+            if (event.which === 13 && pattern.test(value)) {
+                var regionSize = parseInt(value),
+                    haflRegionSize = Math.floor(regionSize / 2),
+                    start = _this.region.center() - haflRegionSize,
+                    end = _this.region.center() + haflRegionSize,
+                    newregion = new Region({
+                        chromosome: _this.region.chromosome,
+                        start: start,
+                        end: end
+                    });
+                _this._handleSetRegion(newregion);
+            }
+        });
+
+        $(this.regionField).val(this.region.toString());
         $(this.goButton).click(function () {
             _this._goRegion($(_this.regionField).val());
         });
@@ -264,15 +283,12 @@ NavigationBar.prototype = {
         $(this.moveFurtherLeftButton).click(function () {
             _this._handleMoveRegion(10);
         });
-
         $(this.moveFurtherRightButton).click(function () {
             _this._handleMoveRegion(-10);
         });
-
         $(this.moveLeftButton).click(function () {
             _this._handleMoveRegion(1);
         });
-
         $(this.moveRightButton).click(function () {
             _this._handleMoveRegion(-1);
         });
@@ -280,7 +296,6 @@ NavigationBar.prototype = {
         $(this.autoheightButton).click(function (e) {
             _this.trigger('autoHeight-button:click', {clickEvent: e, sender: _this});
         });
-
         $(this.compactButton).click(function (e) {
             _this.trigger('autoHeight-button:click', {clickEvent: e, sender: _this});
         });
@@ -304,34 +319,24 @@ NavigationBar.prototype = {
             _this.trigger('quickSearch:go', {item: item, sender: _this});
         });
 
-        $(this.windowSizeField).val(this.region.length());
-        $(this.windowSizeField).bind("keyup", function (event) {
-            var value = $(this).val();
-            var pattern = /^([0-9])+$/;
-            if (event.which === 13 && pattern.test(value)) {
-                var regionSize = parseInt(value);
-                var haflRegionSize = Math.floor(regionSize / 2);
-                var start = _this.region.center() - haflRegionSize;
-                var end = _this.region.center() + haflRegionSize;
-                _this.region.start = start;
-                _this.region.end = end;
-                _this.trigger('region:change', {region: _this.region});
-            }
-        });
         this.rendered = true;
     },
 
     _addRegionHistoryMenuItem: function (region) {
         var _this = this;
-        var menuEntry = $('<li role="presentation"><a tabindex="-1" role="menuitem">' + region.toString() + '</a></li>')[0];
-        $(this.regionHistoryMenu).append(menuEntry);
-        $(menuEntry).click(function () {
-            _this.region.parse($(this).text());
-            $(_this.chromosomesText).text(_this.region.chromosome);
-            $(_this.regionField).val(_this.region.toString());
-            _this.trigger('region:change', {region: _this.region, sender: _this});
-            console.log($(this).text());
-        });
+        var strRgn = region.toString(),
+            menu = $(this.regionHistoryMenu),
+            menuEntry = $(
+            '<li role="presentation" data-region="' + strRgn + '">' +
+            '<a tabindex="-1" role="menuitem">' + strRgn + '</a></li>'
+            )[0];
+        if (menu.find('li[data-region="' + strRgn + '"]').length == 0) {
+            menu.prepend(menuEntry);
+            $(menuEntry).click(function () {
+                var region = new Region($(this).text());
+                _this.setRegion(region);
+            });
+        }
     },
 
     _setQuickSearchMenu: function (query) {
@@ -350,7 +355,7 @@ NavigationBar.prototype = {
                 $(this.searchDataList).append(menuEntry);
             }
         } else {
-            console.log('the quickSearchResultFn function is not valid');
+            console.warn('quickSearchResultFn function is not valid');
         }
     },
 
@@ -374,15 +379,14 @@ NavigationBar.prototype = {
         this.currentChromosomeList = list;
         //add bootstrap elements to the menu
         for (var i in list) {
-            var menuEntry = $('<li role="presentation"><a tabindex="-1" role="menuitem">' + list[i] + '</a></li>')[0];
+            var menuEntry = $(
+                '<li role="presentation"><a tabindex="-1" role="menuitem">' + list[i] + '</a></li>'
+                )[0];
             $(this.chromosomesMenu).append(menuEntry);
             $(menuEntry).click(function () {
-                _this.region.chromosome = $(this).text();
-                $(_this.chromosomesText).text($(this).text());
-                $(_this.regionField).val(_this.region.toString());
-                _this._addRegionHistoryMenuItem(_this.region);
-                _this.trigger('region:change', {region: _this.region, sender: _this});
-                console.log($(this).text());
+                var reg = new Region(_this.region);
+                _.extend(reg, {chromosome: $(this).text()});
+                _this._goRegion(reg.toString());
             });
         }
     },
@@ -391,7 +395,9 @@ NavigationBar.prototype = {
         var _this = this;
 
         var createEntry = function (species) {
-            var menuEntry = $('<li role="presentation"><a tabindex="-1" role="menuitem">' + species.text + '</a></li>')[0];
+            var menuEntry = $(
+                '<li role="presentation"><a tabindex="-1" role="menuitem">' + species.text + '</a></li>'
+                )[0];
             $(_this.speciesMenu).append(menuEntry);
             $(menuEntry).click(function () {
                 _this.species = species;
@@ -411,36 +417,62 @@ NavigationBar.prototype = {
     },
     _goRegion: function (value) {
         var reg = new Region();
-        if (!reg.parse(value) || reg.start < 0 || reg.end < 0 || _.indexOf(this.currentChromosomeList, reg.chromosome) == -1) {
-            $(this.regionField).css({opacity: 0.0});
-            $(this.regionField).animate({opacity: 1}, 700);
+        if (!reg.parse(value) ||
+            reg.start < 0 || reg.end < 0 ||
+            _.indexOf(this.currentChromosomeList, reg.chromosome) == -1) {
+
+            $(this.regionField).css({opacity: 0.0}).animate({opacity: 1}, 700);
         } else {
-            this.region.load(reg);
-            $(this.windowSizeField).val(this.region.length());
-            $(this.chromosomesText).text(this.region.chromosome);
-            this._addRegionHistoryMenuItem(this.region);
-            this.trigger('region:change', {region: this.region, sender: this});
+            this._handleSetRegion(reg);
         }
     },
 
     _handleZoomOutButton: function () {
-        this._handleZoomSlider(Math.max(0, this.zoom - 1));
+        this._handleZoomSlider(Math.max(0, this.zoom - 2));
     },
     _handleZoomSlider: function (value) {
         this.zoom = value;
         this.trigger('zoom:change', {zoom: this.zoom, sender: this});
     },
     _handleZoomInButton: function () {
-        this._handleZoomSlider(Math.min(100, this.zoom + 1));
+        this._handleZoomSlider(Math.min(100, this.zoom + 2));
     },
 
     _handleMoveRegion: function (positions) {
-        var pixelBase = (this.width - this.svgCanvasWidthOffset) / this.region.length();
-        var disp = Math.round((positions * 10) / pixelBase);
-        this.region.start -= disp;
-        this.region.end -= disp;
-        $(this.regionField).val(this.region.toString());
-        this.trigger('region:move', {region: this.region, disp: disp, sender: this});
+        var pixelBase = (this.width - this.svgCanvasWidthOffset) / this.region.length(),
+            disp = Math.round((positions * 10) / pixelBase),
+            region = new Region({
+                chromosome: this.region.chromosome,
+                start: region.start - disp,
+                end: region.end - disp
+            });
+        this.moveRegion(region);
+        this.trigger('region:move', {region: region, disp: disp, sender: this});
+    },
+
+    _handleSetRegion: function(region) {
+        this.setRegion(region);
+        this.trigger('region:change', {region: region, sender: this});
+    },
+    setRegion: function (region) {
+        if (this.region.equalsTo(region)) { return; }
+
+        this.moveRegion(region);
+        $(this.windowSizeField).val(this.region.length());
+        this._addRegionHistoryMenuItem(this.region);
+    },
+    moveRegion: function (region) {
+        if (this.region.equalsTo(region)) { return; }
+
+        this.region.load(region);
+        $(this.chromosomesText).text(region.chromosome);
+        $(this.regionField).val(region.toString());
+        console.log("New region:", region.toString());
+    },
+
+    setZoom: function (zoom) {
+        this.zoom = zoom;
+        $(this.progressBar).css("width", this.zoom + '%');
     },
 
     setVisible: function (obj) {
@@ -453,26 +485,8 @@ NavigationBar.prototype = {
             }
         }
     },
-
-    setRegion: function (region) {
-        this.region.load(region);
-        $(this.chromosomesText).text(this.region.chromosome);
-        $(this.regionField).val(this.region.toString());
-        $(this.windowSizeField).val(this.region.length());
-        this._addRegionHistoryMenuItem(region);
-    },
-    moveRegion: function (region) {
-        this.region.load(region);
-        $(this.chromosomesText).text(this.region.chromosome);
-        $(this.regionField).val(this.region.toString());
-    },
-
     setWidth: function (width) {
         this.width = width;
-    },
-    setZoom: function (zoom) {
-        this.zoom = zoom;
-        $(this.progressBar).css("width", this.zoom + '%');
     },
     draw: function () {
         if (!this.rendered) {
