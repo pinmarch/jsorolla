@@ -198,16 +198,13 @@ TrackListPanel.prototype = {
             'class': this.fontClass
         });
 
-        this.windowSize = 'Window size: ' + Utils.formatNumber(this.region.length()) + ' nts';
         this.viewNtsText = SVG.addChild(this.svgTop, 'text', {
-            'x': mid - (this.windowSize.length * 7 / 2),
-            'y': 11,
+            'x': mid - 150,
+            'y': yOffset,
             'fill': 'black',
             'class': this.fontClass
         });
         this.viewNtsText.setAttribute('visibility', 'hidden');
-        this.viewNtsText.textContent = this.windowSize;
-        $(this.div).find('.gv-window-size-span').html(this.windowSize);
         this._setTextPosition();
 
 
@@ -342,8 +339,8 @@ TrackListPanel.prototype = {
                                     start: _this.region.start - disp,
                                     end: _this.region.end - disp
                                 });
-                                _this.trigger('region:move', {region: newregion, disp: disp, sender: _this});
                                 _this.moveRegion({region: newregion, disp: disp, sender: _this});
+                                _this.trigger('region:move', {region: newregion, disp: disp, sender: _this});
                                 lastX = newX;
                                 _this.setNucleotidPosition(p);
                             }
@@ -461,8 +458,8 @@ TrackListPanel.prototype = {
                         start: _this.region.start - disp,
                         end: _this.region.end - disp
                     });
-                    _this.trigger('region:move', {region: newregion, disp: disp, sender: _this});
                     _this.moveRegion({region: newregion, disp: disp, sender: _this});
+                    _this.trigger('region:move', {region: newregion, disp: disp, sender: _this});
                 }
             });
         };
@@ -508,8 +505,12 @@ TrackListPanel.prototype = {
 
     _updateRegion: function(region) {
         if (this.region.equalsTo(region)) { return false; }
+        var regionLength = this.region.length();
         this.region.load(region);
         this.visualRegion.load(region);
+        if (this.region.length() != regionLength) {
+            this._setPixelBase();
+        }
         this._setTextPosition();
         return true;
     },
@@ -521,14 +522,13 @@ TrackListPanel.prototype = {
     setRegion: function (region) {//item.chromosome, item.position, item.species
         var _this = this;
         if (this._updateRegion(region)) {
-            this._setPixelBase();
             //get pixelbase by Region
             $(this.centerLine).css({'width': this.pixelBase});
             $(this.mouseLine).css({'width': this.pixelBase});
 
             this.trigger('window:size', {windowSize: this.windowSize, sender: this});
             this.trigger('trackRegion:change', {region: this.visualRegion, sender: this})
-            this.trigger('region:change', {region: this.region, sender: this})
+            // this.trigger('region:change', {region: this.region, sender: this})
             console.log("TrackListPanel::setRegion", this.id, this.region.toString(), this.visualRegion.toString());
 
             this.nucleotidText.textContent = "";//remove base char, will be drawn later if needed
@@ -823,7 +823,6 @@ TrackListPanel.prototype = {
         this.positionText.textContent = Utils.formatNumber(centerPosition);
         this.firstPositionText.textContent = Utils.formatNumber(this.visualRegion.start);
         this.lastPositionText.textContent = Utils.formatNumber(this.visualRegion.end);
-
 
         this.windowSize = "Window size: " + Utils.formatNumber(this.visualRegion.length()) + " nts";
         this.viewNtsText.textContent = this.windowSize;

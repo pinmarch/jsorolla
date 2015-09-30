@@ -485,7 +485,6 @@ GenomeViewer.prototype = {
                 'region:change': function (event) {
                     event.region = _this._adjustRegion(event.region);
                     _this._handleSetRegion(event.region, event.sender);
-                    // _this.trigger('region:change', event);
                 }
             }
         });
@@ -527,7 +526,6 @@ GenomeViewer.prototype = {
                 'region:change': function (event) {
                     event.region = _this._adjustRegion(event.region);
                     _this._handleSetRegion(event.region, event.sender);
-                    // _this.trigger('region:change', event);
                 }
             }
         });
@@ -607,7 +605,6 @@ GenomeViewer.prototype = {
                 'region:change': function (event) {
                     event.region = _this._adjustRegion(event.region);
                     _this._handleSetRegion(event.region);
-                    // _this.trigger('region:change', event);
                 },
                 'region:move': function (event) {
                     _this.trigger('region:move', event);
@@ -725,7 +722,8 @@ GenomeViewer.prototype = {
         var ev = { region: new Region(this.region) };
         var newzoom = this._calculateZoomByRegion(region);
         if (newzoom != this.zoom) { ev.newzoom = newzoom; }
-        ev.sender = sender !== 'undefined' ? sender : this;
+        ev.sender = (typeof sender !== 'undefined') ? sender : this;
+
         this.trigger('region:change', ev);
     },
     _setRegion: function (region) {
@@ -740,6 +738,12 @@ GenomeViewer.prototype = {
             sender: this
         });
         this._setRegion(region);
+    },
+    moveRegion: function (disp) {
+        var newregion = new Region(this.region);
+        newregion.start += disp;
+        newregion.end += disp;
+        this.trigger('region:move', {region: newregion, disp: -disp, sender: this});
     },
     _checkRegion: function (newRegion) {
         var newChr = this.chromosomes[newRegion.chromosome];
@@ -805,16 +809,11 @@ GenomeViewer.prototype = {
 
         var regionLength = region.length();
 
-//      zoom = Math.log(REGIONLENGTH/mrl) / Math.log(zlm);
+        // zoom = Math.log(REGIONLENGTH/mrl) / Math.log(zlm);
         var zoom = Math.log(regionLength / minRegionLength) / Math.log(zoomLevelMultiplier);
         return 100 - zoom;
     },
 
-    // move: function (disp) {
-    //     this.region.start += disp;
-    //     this.region.end += disp;
-    //     this.trigger('region:move', {region: this.region, disp: -disp, sender: this});
-    // },
 
     mark: function (args) {
         var attrName = args.attrName || 'feature_id';
