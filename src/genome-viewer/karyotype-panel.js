@@ -56,25 +56,31 @@ function KaryotypePanel(args) {
 KaryotypePanel.prototype = {
     show: function () {
         $(this.div).css({display: 'block'});
-        this.trigger('karyotypePanel:show', {sender: this});
+        this.trigger('panel:show', {sender: this});
     },
     hide: function () {
         $(this.div).css({display: 'none'});
-        this.trigger('karyotypePanel:hide', {sender: this});
+        this.trigger('panel:hide', {sender: this});
     },
     showContent: function () {
         $(this.svg).css({display: 'inline'});
         this.collapsed = false;
-        $(this.collapseDiv).removeClass('active');
-        $(this.collapseDiv).children().first().removeClass('glyphicon-plus');
-        $(this.collapseDiv).children().first().addClass('glyphicon-minus');
+        $(this.collapseDiv)
+            .removeClass('active')
+            .children().first()
+            .removeClass('glyphicon-plus')
+            .addClass('glyphicon-minus');
+        this.trigger('panel:showContent', {sender: this});
     },
     hideContent: function () {
         $(this.svg).css({display: 'none'});
         this.collapsed = true;
-        $(this.collapseDiv).addClass('active');
-        $(this.collapseDiv).children().first().removeClass('glyphicon-minus');
-        $(this.collapseDiv).children().first().addClass('glyphicon-plus');
+        $(this.collapseDiv)
+            .addClass('active')
+            .children().first()
+            .removeClass('glyphicon-minus')
+            .addClass('glyphicon-plus');
+        this.trigger('panel:hideContent', {sender: this});
     },
     setVisible: function (bool) {
         if (bool) {

@@ -86,7 +86,7 @@ NavigationBar.prototype = {
             '       <ul id="chromosomesMenu" class="dropdown-menu" role="menu">' +
             '       </ul>' +
             '   </div>' +
-            '   <div class="btn-group" data-toggle="buttons">' +
+            '   <div class="btn-group">' +
             '       <button id="karyotypeButton" class="btn btn-default btn-xs custom-xs" type="button"><span class="ocb-icon ocb-icon-karyotype"></span></button>' +
             '       <button id="chromosomeButton" class="btn btn-default btn-xs custom-xs" type="button"><span class="ocb-icon ocb-icon-chromosome"></span></button>' +
             '       <button id="regionButton" class="btn btn-default btn-xs custom-xs" type="button"><span class="ocb-icon ocb-icon-region"></span></button>' +
@@ -224,16 +224,16 @@ NavigationBar.prototype = {
 
 
         $(this.karyotypeButton).click(function () {
-            $(this).toggleClass('panel-visible');
-            _this.trigger('karyotype-button:change', {selected: $(this).hasClass('panel-visible'), sender: _this});
+            _this.trigger('karyotype-button:change',
+                {selected: !$(this).hasClass('active'), sender: _this});
         });
         $(this.chromosomeButton).click(function () {
-            $(this).toggleClass('panel-visible');
-            _this.trigger('chromosome-button:change', {selected: $(this).hasClass('panel-visible'), sender: _this});
+            _this.trigger('chromosome-button:change',
+                {selected: !$(this).hasClass('active'), sender: _this});
         });
         $(this.regionButton).click(function () {
-            $(this).toggleClass('panel-visible');
-            _this.trigger('region-button:change', {selected: $(this).hasClass('panel-visible'), sender: _this});
+            _this.trigger('region-button:change',
+                {selected: !$(this).hasClass('active'), sender: _this});
         });
 
 

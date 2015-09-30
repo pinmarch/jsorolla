@@ -74,18 +74,21 @@ function TrackListPanel(args) {//parent is a DOM div element
 TrackListPanel.prototype = {
     show: function () {
         $(this.div).css({display: 'block'});
+        this.trigger('panel:show', {sender: this});
     },
-
     hide: function () {
         $(this.div).css({display: 'none'});
+        this.trigger('panel:hide', {sender: this});
     },
+
     setVisible: function (bool) {
         if (bool) {
-            $(this.div).css({display: 'block'});
+            this.show();
         } else {
-            $(this.div).css({display: 'none'});
+            this.hide();
         }
     },
+
     setTitle: function (title) {
         if ('titleDiv' in this) {
             $(this.titleDiv).html(title);
@@ -100,6 +103,7 @@ TrackListPanel.prototype = {
             .children().first()
             .removeClass('glyphicon-plus')
             .addClass('glyphicon-minus');
+        this.trigger('panel:showContent', {sender: this});
     },
     hideContent: function () {
         $(this.tlHeaderDiv).css({display: 'none'});
@@ -110,6 +114,7 @@ TrackListPanel.prototype = {
             .children().first()
             .removeClass('glyphicon-minus')
             .addClass('glyphicon-plus');
+        this.trigger('panel:hideContent', {sender: this});
     },
     render: function (targetId) {
         var _this = this;

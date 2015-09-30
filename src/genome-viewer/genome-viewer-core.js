@@ -194,16 +194,19 @@ GenomeViewer.prototype = {
         /*karyotype Panel*/
         if (this.drawKaryotypePanel) {
             this.karyotypePanel = this._drawKaryotypePanel(this.karyotypeDiv);
+            this.karyotypePanel.show();
         }
 
         /* Chromosome Panel */
         if (this.drawChromosomePanel) {
             this.chromosomePanel = this._drawChromosomePanel(this.chromosomeDiv);
+            this.chromosomePanel.show();
         }
 
         /* Region Panel, is a TrackListPanel Class */
         if (this.drawRegionOverviewPanel) {
             this.regionOverviewPanel = this._createRegionOverviewPanel(this.regionDiv);
+            this.regionOverviewPanel.show();
         }
         /*TrackList Panel*/
         this.trackListPanel = this._createTrackListPanel(this.tracksDiv);
@@ -485,6 +488,12 @@ GenomeViewer.prototype = {
                 'region:change': function (event) {
                     event.region = _this._adjustRegion(event.region);
                     _this._handleSetRegion(event.region, event.sender);
+                },
+                'panel:show': function (event) {
+                    $(_this.navigationBar.karyotypeButton).addClass('active');
+                },
+                'panel:hide': function (event) {
+                    $(_this.navigationBar.karyotypeButton).removeClass('active');
                 }
             }
         });
@@ -526,6 +535,12 @@ GenomeViewer.prototype = {
                 'region:change': function (event) {
                     event.region = _this._adjustRegion(event.region);
                     _this._handleSetRegion(event.region, event.sender);
+                },
+                'panel:show': function (event) {
+                    $(_this.navigationBar.chromosomeButton).addClass('active');
+                },
+                'panel:hide': function (event) {
+                    $(_this.navigationBar.chromosomeButton).removeClass('active');
                 }
             }
         });
@@ -570,6 +585,12 @@ GenomeViewer.prototype = {
                 },
                 'tracks:ready': function () {
                     _this.checkTrackListReady();
+                },
+                'panel:show': function (event) {
+                    $(_this.navigationBar.regionButton).addClass('active');
+                },
+                'panel:hide': function (event) {
+                    $(_this.navigationBar.regionButton).removeClass('active');
                 }
             }
         });
