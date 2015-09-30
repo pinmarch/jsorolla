@@ -20,10 +20,11 @@
  */
 
 function GenomeViewer(args) {
+    var _this = this;
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
-    var _this = this;
     this.id = Utils.genId("GenomeViewer");
 
     //set default args
@@ -104,9 +105,10 @@ GenomeViewer.prototype = {
 
     render: function (targetId) {
         var _this = this;
+
         this.targetId = (targetId) ? targetId : this.targetId;
         this.targetDiv = (this.targetId instanceof HTMLElement ) ? this.targetId : $('#' + this.targetId)[0];
-        if (this.targetDiv === 'undefined') {
+        if (typeof this.targetDiv === 'undefined') {
             console.log('targetId not found');
             return;
         }
@@ -160,13 +162,7 @@ GenomeViewer.prototype = {
         $(this.trackListPanelsDiv).append(this.tracksDiv);
 
 
-        /****************************/
-        /****************************/
-        /****************************/
-
-
         this.chromosomes = this.getChromosomes();
-
         this.setMinRegion(this.region, this.getSVGCanvasWidth());
         this.zoom = this._calculateZoomByRegion(this.region);
 
@@ -244,13 +240,10 @@ GenomeViewer.prototype = {
             }
         });
 
-        /****************************/
-        /****************************/
-        /****************************/
-
 
         this.rendered = true;
     },
+
     draw: function () {
         if (!this.rendered) {
             console.info('Genome Viewer is not rendered yet');
@@ -267,6 +260,7 @@ GenomeViewer.prototype = {
         $("body").unbind(".genomeViewer");
         delete this;
     },
+
     getChromosomes: function () {
         var saveChromosomes = function (chromsomeList) {
             var chromosomes = {};
@@ -297,10 +291,10 @@ GenomeViewer.prototype = {
         }
         return chromosomes;
     },
+
     /**/
     /*Components*/
     /**/
-
     _createNavigationBar: function (targetId) {
         var _this = this;
 
@@ -474,7 +468,8 @@ GenomeViewer.prototype = {
 
     _drawKaryotypePanel: function (targetId) {
         var _this = this;
-        karyotypePanel = new KaryotypePanel({
+
+        var karyotypePanel = new KaryotypePanel({
             targetId: targetId,
             width: this.width - this.sidePanelWidth,
             height: 125,
@@ -519,7 +514,6 @@ GenomeViewer.prototype = {
 
     _drawChromosomePanel: function (targetId) {
         var _this = this;
-
 
         var chromosomePanel = new ChromosomePanel({
             targetId: targetId,

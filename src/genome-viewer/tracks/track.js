@@ -24,24 +24,23 @@ function Track(args) {
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
+    this.id = Utils.genId("Track");
+    this.title;
+
+    this.targetId;
     this.width = 200;
-    this.height = 200;
-
-
+    this.height = 100;
     this.dataAdapter;
     this.renderer;
     this.resizable = true;
     this.autoHeight = false;
-    this.targetId;
-    this.id = Utils.genId("Track");
-    this.title;
     this.minHistogramRegionSize = 300000000; // 300Mnt
     this.maxLabelRegionSize = 300000000; // 300Mnt
-    this.height = 100;
     this.visibleRegionSize;
     this.fontClass = 'ocb-font-sourcesanspro ocb-font-size-14';
 
     _.extend(this, args);
+
 
     this.pixelBase;
     this.svgCanvasWidth = 500000;//mesa
@@ -63,11 +62,7 @@ function Track(args) {
     this.renderedArea = {};//used for renders to store binary trees
     this.chunksDisplayed = {};//used to avoid painting multiple times features contained in more than 1 chunk
 
-    if ('handlers' in this) {
-        for (eventName in this.handlers) {
-            this.on(eventName, this.handlers[eventName]);
-        }
-    }
+    this.on(this.handlers);
 
     this.rendered = false;
     if (this.autoRender) {

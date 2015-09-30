@@ -39,7 +39,6 @@ function ChromosomePanel(args) {
     //set own region object
     this.region = new Region(this.region);
 
-
     this.lastChromosome = "";
     this.data;
 
@@ -52,6 +51,20 @@ function ChromosomePanel(args) {
 };
 
 ChromosomePanel.prototype = {
+    setTitle: function (title) {
+        if ('titleDiv' in this) {
+            $(this.titleDiv).first().html(title);
+        }
+    },
+
+    setVisible: function (bool) {
+        if (bool) {
+            this.show();
+        } else {
+            this.hide();
+        }
+    },
+
     show: function () {
         $(this.div).css({display: 'block'});
         this.trigger('panel:show', {sender: this});
@@ -80,22 +93,11 @@ ChromosomePanel.prototype = {
             .addClass('glyphicon-plus');
         this.trigger('panel:hideContent', {sender: this});
     },
-    setVisible: function (bool) {
-        if (bool) {
-            this.show();
-        } else {
-            this.hide();
-        }
-    },
-    setTitle: function (title) {
-        if ('titleDiv' in this) {
-            $(this.titleDiv).first().html(title);
-        }
-    },
+
+
     setWidth: function (width) {
         this.width = width;
         this.svg.setAttribute("width", width);
-//        this.tracksViewedRegion = this.width / Utils.getPixelBaseByZoom(this.zoom);
 
         if(typeof this.data !== 'undefined'){
             this.clean();
@@ -548,6 +550,5 @@ ChromosomePanel.prototype = {
         var x = (this.region.start * this.pixelBase) + 20;//20 is the margin
         this.positionBox.setAttribute("x", x);
         this.positionBox.setAttribute("width", pixelWidth);
-
     }
 }

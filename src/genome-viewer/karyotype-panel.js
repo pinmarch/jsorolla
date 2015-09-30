@@ -34,8 +34,8 @@ function KaryotypePanel(args) {
     this.collapsible = true;
 
 
-//set instantiation args, must be last
-        _.extend(this, args);
+    //set instantiation args, must be last
+    _.extend(this, args);
 
     //set own region object
     this.region = new Region(this.region);
@@ -54,6 +54,20 @@ function KaryotypePanel(args) {
 };
 
 KaryotypePanel.prototype = {
+    setTitle: function (title) {
+        if ('titleDiv' in this) {
+            $(this.titleDiv).children().first().html(title);
+        }
+    },
+
+    setVisible: function (bool) {
+        if (bool) {
+            this.show();
+        } else {
+            this.hide();
+        }
+    },
+
     show: function () {
         $(this.div).css({display: 'block'});
         this.trigger('panel:show', {sender: this});
@@ -82,18 +96,8 @@ KaryotypePanel.prototype = {
             .addClass('glyphicon-plus');
         this.trigger('panel:hideContent', {sender: this});
     },
-    setVisible: function (bool) {
-        if (bool) {
-            this.show();
-        } else {
-            this.hide();
-        }
-    },
-    setTitle: function (title) {
-        if ('titleDiv' in this) {
-            $(this.titleDiv).children().first().html(title);
-        }
-    },
+
+
     setWidth: function (width) {
         this.width = width;
         this.svg.setAttribute("width", width);

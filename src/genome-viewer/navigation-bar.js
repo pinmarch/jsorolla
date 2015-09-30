@@ -20,11 +20,10 @@
  */
 
 function NavigationBar(args) {
+    var _this = this;
 
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
-
-    var _this = this;
 
     this.id = Utils.genId("NavigationBar");
 

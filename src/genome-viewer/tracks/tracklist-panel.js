@@ -27,9 +27,12 @@ function TrackListPanel(args) {//parent is a DOM div element
 
     //set default args
     this.id = Utils.genId("TrackListPanel");
+
+    this.height = 0;
     this.collapsed = false;
     this.collapsible = false;
-
+    this.zoomMultiplier = 1;
+    this.showRegionOverviewBox = false;
     this.fontClass = 'ocb-font-sourcesanspro ocb-font-size-14';
 
     this.trackSvgList = [];
@@ -39,28 +42,19 @@ function TrackListPanel(args) {//parent is a DOM div element
     this.parentLayout;
     this.mousePosition;
     this.windowSize;
-
-    this.zoomMultiplier = 1;
-    this.showRegionOverviewBox = false;
-
-    this.height = 0;
+    this.status;
 
     //set instantiation args, must be last
     _.extend(this, args);
 
-    //set new region object
-    this.region = new Region(this.region);
+
     this.width -= 18;
 
-
-    this.status;
-
+    //set new region object
+    this.region = new Region(this.region);
     //this region is used to do not modify original region, and will be used by trackSvg
     this.visualRegion = new Region(this.region);
-
-    /********/
     this._setPixelBase();
-    /********/
 
     this.on(this.handlers);
 
@@ -72,13 +66,10 @@ function TrackListPanel(args) {//parent is a DOM div element
 };
 
 TrackListPanel.prototype = {
-    show: function () {
-        $(this.div).css({display: 'block'});
-        this.trigger('panel:show', {sender: this});
-    },
-    hide: function () {
-        $(this.div).css({display: 'none'});
-        this.trigger('panel:hide', {sender: this});
+    setTitle: function (title) {
+        if ('titleDiv' in this) {
+            $(this.titleDiv).html(title);
+        }
     },
 
     setVisible: function (bool) {
@@ -89,10 +80,13 @@ TrackListPanel.prototype = {
         }
     },
 
-    setTitle: function (title) {
-        if ('titleDiv' in this) {
-            $(this.titleDiv).html(title);
-        }
+    show: function () {
+        $(this.div).css({display: 'block'});
+        this.trigger('panel:show', {sender: this});
+    },
+    hide: function () {
+        $(this.div).css({display: 'none'});
+        this.trigger('panel:hide', {sender: this});
     },
     showContent: function () {
         $(this.tlHeaderDiv).css({display: 'block'});
@@ -116,15 +110,16 @@ TrackListPanel.prototype = {
             .addClass('glyphicon-plus');
         this.trigger('panel:hideContent', {sender: this});
     },
+
     render: function (targetId) {
         var _this = this;
+
         this.targetId = (targetId) ? targetId : this.targetId;
         this.targetDiv = (this.targetId instanceof HTMLElement ) ? this.targetId : $('#' + this.targetId)[0];
-        if (this.targetDiv === 'undefined') {
+        if (typeof this.targetDiv === 'undefined') {
             console.log('targetId not found');
             return;
         }
-
 
         this.div = $('<div id="' + this.id + '" style="height:100%;position: relative;"></div>')[0];
         $(this.targetDiv).append(this.div);
@@ -135,12 +130,18 @@ TrackListPanel.prototype = {
                 '<div style="display:inline-block;line-height: 24px;margin-left: 5px;width:120px">' +
                 this.title + '</div></div>'
                 )[0];
-            var windowSizeDiv = $('<div style="display:inline;margin-left:35%" class="gv-window-size-span"></div>');
+            var windowSizeDiv = $(
+                '<div style="display:inline;margin-left:35%" class="gv-window-size-span"></div>'
+                );
             $(titleDiv).append(windowSizeDiv);
             $(this.div).append(titleDiv);
 
             if (this.collapsible == true) {
-                this.collapseDiv = $('<div type="button" class="btn btn-default btn-xs pull-right" style="display:inline;margin:2px;height:20px"><span class="glyphicon glyphicon-minus"></span></div>');
+                this.collapseDiv = $(
+                    '<div type="button" class="btn btn-default btn-xs pull-right" ' +
+                    'style="display:inline;margin:2px;height:20px">' +
+                    '<span class="glyphicon glyphicon-minus"></span></div>'
+                    );
                 $(titleDiv).dblclick(function () {
                     if (_this.collapsed) {
                         _this.showContent();
@@ -355,10 +356,8 @@ TrackListPanel.prototype = {
                     break;
                 case 2: //Middle mouse button pressed
                 case 'ctrlKey1': //ctrlKey and left mouse button
-                    $(selBox).css({'visibility': 'visible'});
-                    $(selBox).css({'width': 0});
                     downX = (event.pageX - $(_this.tlTracksDiv).offset().left);
-                    $(selBox).css({"left": downX});
+                    $(selBox).css({'visibility': 'visible', 'width': 0, 'left': downX});
                     $(this).mousemove(function (event) {
                         moveX = (event.pageX - $(_this.tlTracksDiv).offset().left);
                         if (moveX < downX) {
@@ -372,8 +371,6 @@ TrackListPanel.prototype = {
                     break;
                 default: // other button?
             }
-
-
         });
 
         $(this.tlTracksDiv).mouseup(function (event) {
