@@ -413,6 +413,7 @@ NavigationBar.prototype = {
             }
         }
     },
+
     _goRegion: function (value) {
         var reg = new Region();
         if (!reg.parse(value) ||
@@ -425,6 +426,7 @@ NavigationBar.prototype = {
         }
     },
 
+
     _handleZoomOutButton: function () {
         this._handleZoomSlider(Math.max(0, this.zoom - 2));
     },
@@ -435,6 +437,11 @@ NavigationBar.prototype = {
     _handleZoomInButton: function () {
         this._handleZoomSlider(Math.min(100, this.zoom + 2));
     },
+    setZoom: function (zoom) {
+        this.zoom = zoom;
+        $(this.progressBar).css("width", this.zoom + '%');
+    },
+
 
     _handleMoveRegion: function (positions) {
         var pixelBase = (this.width - this.svgCanvasWidthOffset) / this.region.length(),
@@ -447,11 +454,11 @@ NavigationBar.prototype = {
         this.moveRegion(region);
         this.trigger('region:move', {region: region, disp: disp, sender: this});
     },
-
     _handleSetRegion: function(region) {
         this.setRegion(region);
         this.trigger('region:change', {region: region, sender: this});
     },
+
     setRegion: function (region) {
         if (this.region.equalsTo(region)) { return; }
 
@@ -467,10 +474,6 @@ NavigationBar.prototype = {
         $(this.regionField).val(region.toString());
     },
 
-    setZoom: function (zoom) {
-        this.zoom = zoom;
-        $(this.progressBar).css("width", this.zoom + '%');
-    },
 
     setVisible: function (obj) {
         for (key in obj) {

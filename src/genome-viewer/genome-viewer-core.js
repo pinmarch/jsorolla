@@ -377,7 +377,7 @@ GenomeViewer.prototype = {
             handlers: {
                 'region:change': function (event) {
                     event.region = _this._adjustRegion(event.region);
-                    _this.trigger('region:change', event);
+                    _this._handleSetRegion(event.region);
                 },
                 'region:move': function (event) {
                     _this.trigger('region:move', event);
@@ -385,6 +385,10 @@ GenomeViewer.prototype = {
                 'zoom:change': function (event) {
                     event.newregion = _this._calculateRegionByZoom(event.zoom);
                     _this.trigger('zoom:change', event);
+                },
+                'species:change': function (event) {
+                    _this.trigger('species:change', event);
+                    _this._handleSetRegion(event.species.region);
                 },
                 'karyotype-button:change': function (event) {
                     if (event.selected) {
@@ -407,10 +411,6 @@ GenomeViewer.prototype = {
                         _this.regionOverviewPanel.hide();
                     }
                 },
-                'species:change': function (event) {
-                    _this.trigger('species:change', event);
-                    _this.setRegion(event.species.region);
-                },
                 'fullscreen:click': function (event) {
                     if (_this.fullscreen) {
                         $(_this.div).css({width: 'auto'});
@@ -423,7 +423,7 @@ GenomeViewer.prototype = {
                     }
                 },
                 'restoreDefaultRegion:click': function (event) {
-                    _this.setRegion(_this.defaultRegion);
+                    _this._handleSetRegion(_this.defaultRegion);
                 },
                 'autoHeight-button:click': function (event) {
                     _this.enableAutoHeight();
@@ -440,27 +440,24 @@ GenomeViewer.prototype = {
         });
 
         this.on('region:change', function (event) {
-            var newzoom = _this._calculateZoomByRegion(event.region);
-            _this.navigationBar.setZoom(newzoom);
+            if (event.newzoom) {
+                _this.navigationBar.setZoom(event.newzoom);
+                _this.setZoom(event.newzoom);
+            }
             _this.navigationBar.setRegion(event.region);
-            _this.setZoom(newzoom);
             _this.setRegion(event.region);
         });
 
         this.on('region:move', function (event) {
-            // if (event.sender != navigationBar) {
-            // }
-            // if (event.sender == navigationBar) {
-            // }
             _this.navigationBar.moveRegion(event.region);
             _this.setRegion(event.region);
         });
 
         this.on('zoom:change', function (event) {
             _this.setZoom(event.zoom);
-            _this.setRegion(event.newregion);
-            _this.navigationBar.setZoom(_this.zoom);
-            _this.navigationBar.setRegion(event.newregion);
+            if (event.newregion) {
+                _this._handleSetRegion(event.newregion);
+            }
         });
 
         this.on('width:change', function (event) {
@@ -487,7 +484,8 @@ GenomeViewer.prototype = {
             handlers: {
                 'region:change': function (event) {
                     event.region = _this._adjustRegion(event.region);
-                    _this.trigger('region:change', event);
+                    _this._handleSetRegion(event.region, event.sender);
+                    // _this.trigger('region:change', event);
                 }
             }
         });
@@ -528,7 +526,8 @@ GenomeViewer.prototype = {
             handlers: {
                 'region:change': function (event) {
                     event.region = _this._adjustRegion(event.region);
-                    _this.trigger('region:change', event);
+                    _this._handleSetRegion(event.region, event.sender);
+                    // _this.trigger('region:change', event);
                 }
             }
         });
@@ -566,7 +565,7 @@ GenomeViewer.prototype = {
             handlers: {
                 'region:change': function (event) {
                     event.region = _this._adjustRegion(event.region);
-                    _this.trigger('region:change', event);
+                    _this._handleSetRegion(event.region);
                 },
                 'region:move': function (event) {
                     _this.trigger('region:move', event);
@@ -607,7 +606,8 @@ GenomeViewer.prototype = {
             handlers: {
                 'region:change': function (event) {
                     event.region = _this._adjustRegion(event.region);
-                    _this.trigger('region:change', event);
+                    _this._handleSetRegion(event.region);
+                    // _this.trigger('region:change', event);
                 },
                 'region:move': function (event) {
                     _this.trigger('region:move', event);
@@ -719,14 +719,27 @@ GenomeViewer.prototype = {
     },
 
 
+    _handleSetRegion: function (region, sender) {
+        this.setRegion(region);
+
+        var ev = { region: new Region(this.region) };
+        var newzoom = this._calculateZoomByRegion(region);
+        if (newzoom != this.zoom) { ev.newzoom = newzoom; }
+        ev.sender = sender !== 'undefined' ? sender : this;
+        this.trigger('region:change', ev);
+    },
     _setRegion: function (region) {
         //update internal parameters
+        this.setMinRegion(region, this.getSVGCanvasWidth());
         this.region.load(region);
     },
     setRegion: function (region) {
-        this.setMinRegion(region, this.getSVGCanvasWidth());
+        this.trigger('region:changing', {
+            region: new Region(this.region),
+            newregion: region,
+            sender: this
+        });
         this._setRegion(region);
-        this.trigger('region:refresh', {region: new Region(this.region), sender: this});
     },
     _checkRegion: function (newRegion) {
         var newChr = this.chromosomes[newRegion.chromosome];

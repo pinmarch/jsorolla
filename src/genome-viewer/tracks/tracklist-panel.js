@@ -333,17 +333,17 @@ TrackListPanel.prototype = {
                     $(this).mousemove(function (event) {
                         var newX = (downX - event.clientX) / _this.pixelBase | 0;//truncate always towards zero
                         if (newX != lastX) {
-                            var disp = lastX - newX;
-                            var centerPosition = _this.region.center();
-                            var p = centerPosition - disp;
+                            var disp = lastX - newX,
+                                centerPosition = _this.region.center(),
+                                p = centerPosition - disp;
                             if (p > 0) {//avoid 0 and negative positions
                                 var newregion = new Region({
                                     chromosome: _this.region.chromosome,
                                     start: _this.region.start - disp,
                                     end: _this.region.end - disp
                                 });
-                                _this.moveRegion({region: newregion, disp: disp, sender: _this});
                                 _this.trigger('region:move', {region: newregion, disp: disp, sender: _this});
+                                _this.moveRegion({region: newregion, disp: disp, sender: _this});
                                 lastX = newX;
                                 _this.setNucleotidPosition(p);
                             }
@@ -461,8 +461,8 @@ TrackListPanel.prototype = {
                         start: _this.region.start - disp,
                         end: _this.region.end - disp
                     });
-                    _this.moveRegion({region: newregion, disp: disp, sender: _this});
                     _this.trigger('region:move', {region: newregion, disp: disp, sender: _this});
+                    _this.moveRegion({region: newregion, disp: disp, sender: _this});
                 }
             });
         };
@@ -507,31 +507,34 @@ TrackListPanel.prototype = {
     },
 
     _updateRegion: function(region) {
+        if (this.region.equalsTo(region)) { return false; }
         this.region.load(region);
         this.visualRegion.load(region);
         this._setTextPosition();
+        return true;
     },
     moveRegion: function (event) {
-        this._updateRegion(event.region);
-        this.trigger('trackRegion:move', event);
+        if (this._updateRegion(event.region)) {
+            this.trigger('trackRegion:move', event);
+        }
     },
     setRegion: function (region) {//item.chromosome, item.position, item.species
         var _this = this;
-        this._updateRegion(region);
+        if (this._updateRegion(region)) {
+            this._setPixelBase();
+            //get pixelbase by Region
+            $(this.centerLine).css({'width': this.pixelBase});
+            $(this.mouseLine).css({'width': this.pixelBase});
 
-        this._setPixelBase();
-        //get pixelbase by Region
-        $(this.centerLine).css({'width': this.pixelBase});
-        $(this.mouseLine).css({'width': this.pixelBase});
+            this.trigger('window:size', {windowSize: this.windowSize, sender: this});
+            this.trigger('trackRegion:change', {region: this.visualRegion, sender: this})
+            this.trigger('region:change', {region: this.region, sender: this})
+            console.log("TrackListPanel::setRegion", this.id, this.region.toString(), this.visualRegion.toString());
 
-        this.trigger('window:size', {windowSize: this.windowSize});
-        this.trigger('trackRegion:change', {region: this.visualRegion, sender: this})
-        // this.trigger('region:change', {region: this.region, sender: this})
-        console.log("TrackListPanel::setRegion", this.id, this.region.toString(), this.visualRegion.toString());
+            this.nucleotidText.textContent = "";//remove base char, will be drawn later if needed
 
-        this.nucleotidText.textContent = "";//remove base char, will be drawn later if needed
-
-        this.status = 'rendering';
+            this.status = 'rendering';
+        }
     },
 
     draw: function () {
