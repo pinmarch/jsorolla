@@ -20,8 +20,8 @@
  */
 
 function KaryotypePanel(args) {
-    // Using Underscore 'extend' function to extend and add Backbone Events
 
+    // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
     this.id = Utils.genId('KaryotypePanel');
@@ -118,15 +118,23 @@ KaryotypePanel.prototype = {
             return;
         }
 
-        this.div = $('<div id="karyotype-panel"></div>')[0];
+        this.div = $('<div id="karyotype-panel" class="gv-karyotype-panel-frame"></div>')[0];
         $(this.targetDiv).append(this.div);
 
         if ('title' in this && this.title !== '') {
-            this.titleDiv = $('<div id="tl-title" class="gv-panel-title unselectable"><span style="line-height: 24px;margin-left: 5px;">' + this.title + '</span></div>')[0];
+            this.titleDiv = $(
+                '<div id="tl-title" class="gv-panel-title unselectable">' +
+                '<span style="line-height: 24px;margin-left: 5px;">' + this.title +
+                '</span></div>'
+                )[0];
             $(this.div).append(this.titleDiv);
 
             if(this.collapsible == true){
-                this.collapseDiv = $('<div type="button" class="btn btn-default btn-xs pull-right" style="display:inline;margin:2px;height:20px"><span class="glyphicon glyphicon-minus"></span></div>');
+                this.collapseDiv = $(
+                    '<div type="button" class="btn btn-default btn-xs pull-right" ' +
+                    'style="display:inline;margin:2px;height:20px">' +
+                    '<span class="glyphicon glyphicon-minus"></span></div>'
+                    );
                 $(this.titleDiv).dblclick(function () {
                     if (_this.collapsed) {
                         _this.showContent();
@@ -152,7 +160,11 @@ KaryotypePanel.prototype = {
         this.markGroup = SVG.addChild(this.svg, "g", {"cursor": "pointer"});
         $(this.div).addClass('unselectable');
 
-        this.colors = {gneg: "white", stalk: "#666666", gvar: "#CCCCCC", gpos25: "silver", gpos33: "lightgrey", gpos50: "gray", gpos66: "dimgray", gpos75: "darkgray", gpos100: "black", gpos: "gray", acen: "blue"};
+        this.colors = {
+            gneg: "white", stalk: "#666666", gvar: "#CCCCCC", gpos25: "silver",
+            gpos33: "lightgrey", gpos50: "gray", gpos66: "dimgray", gpos75: "darkgray",
+            gpos100: "black", gpos: "gray", acen: "blue"
+        };
 
         this.rendered = true;
     },
@@ -222,33 +234,26 @@ KaryotypePanel.prototype = {
         _this.chrOffsetX = {};
 
         for (var i = 0, len = chromosomeList.length; i < len; i++) { //loop over chromosomes
-            var chromosome = chromosomeList[i];
-//		var chr = chromosome.name;
-            var chrSize = chromosome.size * _this.pixelBase;
-            var y = yMargin + (biggerChr * _this.pixelBase) - chrSize;
-            _this.chrOffsetY[chromosome.name] = y;
-            var firstCentromere = true;
+            var firstCentromere = true,
+                chromosome = chromosomeList[i],
+                chrSize = chromosome.size * _this.pixelBase,
+                centerPosition = _this.region.center(),
+                pointerPosition = (centerPosition * _this.pixelBase),
+                y = yMargin + (biggerChr * _this.pixelBase) - chrSize;
 
-            var centerPosition = _this.region.center();
-            var pointerPosition = (centerPosition * _this.pixelBase);
+            _this.chrOffsetY[chromosome.name] = y;
 
             var group = SVG.addChild(_this.svg, "g", {"cursor": "pointer", "chr": chromosome.name});
             $(group).click(function (event) {
-                var chrClicked = this.getAttribute("chr");
-//			for ( var k=0, len=chromosomeList.length; k<len; k++) {
-//			var offsetX = (event.pageX - $(_this.svg).offset().left);
-//			if(offsetX > _this.chrOffsetX[chromosomeList[k]]) chrClicked = chromosomeList[k];
-//			}
-
-                var offsetY = (event.pageY - $(_this.svg).offset().top);
-//			var offsetY = event.originalEvent.layerY - 3;
+                var chrClicked = this.getAttribute("chr"),
+                    offsetY = (event.pageY - $(_this.svg).offset().top),
+                    clickPosition = parseInt((offsetY - _this.chrOffsetY[chrClicked]) / _this.pixelBase);
 
                 _this.positionBox.setAttribute("x1", _this.chrOffsetX[chrClicked] - 10);
                 _this.positionBox.setAttribute("x2", _this.chrOffsetX[chrClicked] + 23);
                 _this.positionBox.setAttribute("y1", offsetY);
                 _this.positionBox.setAttribute("y2", offsetY);
 
-                var clickPosition = parseInt((offsetY - _this.chrOffsetY[chrClicked]) / _this.pixelBase);
                 _this.region.chromosome = chrClicked;
                 _this.region.start = clickPosition;
                 _this.region.end = clickPosition;
@@ -271,10 +276,14 @@ KaryotypePanel.prototype = {
                     var endX = x + width;
                     var endY = y + height;
                     if (firstCentromere) {
-                        points = x + "," + y + " " + endX + "," + y + " " + endX + "," + middleY + " " + middleX + "," + endY + " " + x + "," + middleY;
+                        points = x + "," + y + " " + endX + "," + y + " " +
+                                 endX + "," + middleY + " " + middleX + "," + endY + " " +
+                                 x + "," + middleY;
                         firstCentromere = false;
                     } else {
-                        points = x + "," + endY + " " + x + "," + middleY + " " + middleX + "," + y + " " + endX + "," + middleY + " " + endX + "," + endY;
+                        points = x + "," + endY + " " + x + "," + middleY + " " +
+                                 middleX + "," + y + " " + endX + "," + middleY + " " +
+                                 endX + "," + endY;
                     }
                     SVG.addChild(group, "polyline", {
                         "points": points,

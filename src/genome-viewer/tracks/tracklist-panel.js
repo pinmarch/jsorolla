@@ -300,7 +300,7 @@ TrackListPanel.prototype = {
             var rcX = (cX / _this.pixelBase) | 0;
             var pos = (rcX * _this.pixelBase) + (mid % _this.pixelBase) - 1;
             $(_this.mouseLine).css({'left': pos});
-//
+
             var posOffset = (mid / _this.pixelBase) | 0;
             _this.mousePosition = centerPosition + rcX - posOffset;
             _this.trigger('mousePosition:change', {
@@ -374,10 +374,9 @@ TrackListPanel.prototype = {
         });
 
         $(this.tlTracksDiv).mouseup(function (event) {
-            $('html').removeClass("unselectable");
-            $(this).css({"cursor": "default"});
             $(_this.mouseLine).css({'visibility': 'visible'});
-            $(this).off('mousemove');
+            $('html').removeClass("unselectable");
+            $(this).off('mousemove').css({"cursor": "default"});
 
             var mouseState = event.which;
             if (event.ctrlKey) {
@@ -418,10 +417,9 @@ TrackListPanel.prototype = {
         });
 
         $(this.tlTracksDiv).mouseleave(function (event) {
-            $(this).css({"cursor": "default"});
             $(_this.mouseLine).css({'visibility': 'hidden'});
-            $(this).off('mousemove');
             $("body").off('keydown.genomeViewer');
+            $(this).off('mousemove').css({"cursor": "default"});
 
             $(selBox).css({'visibility': 'hidden'});
             downX = null;

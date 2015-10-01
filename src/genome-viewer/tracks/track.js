@@ -71,13 +71,13 @@ function Track(args) {
 };
 
 Track.prototype = {
-
     get: function (attr) {
         return this[attr];
     },
     set: function (attr, value) {
         this[attr] = value;
     },
+
     hide: function () {
         $(this.div).css({display: 'none'});
         this.trigger('track:hide', {sender: this});
@@ -114,11 +114,18 @@ Track.prototype = {
             this.hideContent();
         }
     },
+
+
+    setTitle: function (title) {
+        $(this.titlediv).html(title);
+    },
+
     setSpecies: function (species) {
         this.species = species;
         this.dataAdapter.species = this.species
         this.trigger('track:speciesChanged', {sender: this});
     },
+
 
     setWidth: function (width) {
         this.width = width;
@@ -144,7 +151,8 @@ Track.prototype = {
     },
     _updateSVGHeight: function () {
         if (this.resizable && !this.histogram) {
-            var renderedHeight = Object.keys(this.renderedArea).length * 20;//this must be passed by config, 20 for test
+            //this must be passed by config, 20 for test
+            var renderedHeight = Object.keys(this.renderedArea).length * 20;
             this.main.setAttribute('height', renderedHeight);
             this.svgCanvasFeatures.setAttribute('height', renderedHeight);
             this.hoverRect.setAttribute('height', renderedHeight);
@@ -161,9 +169,7 @@ Track.prototype = {
         this.autoHeight = true;
         this.updateHeight();
     },
-    setTitle: function (title) {
-        $(this.titlediv).html(title);
-    },
+
 
     setLoading: function (bool) {
         if (bool) {
@@ -223,11 +229,8 @@ Track.prototype = {
         var svgdiv = $('<div id="' + this.id + '-svgdiv" class="gvtrack-svgdiv"></div>')[0];
         var resizediv = $('<div id="' + this.id + '-resizediv" class="ocb-track-resize"></div>')[0];
 
-        $(targetId).addClass("unselectable");
-        $(targetId).append(div);
-        $(div).append(titleBardiv);
-        $(div).append(svgdiv);
-        $(div).append(resizediv);
+        $(targetId).addClass("unselectable").append(div);
+        $(div).append(titleBardiv).append(svgdiv).append(resizediv);
 
 
         /** title div **/
@@ -253,35 +256,34 @@ Track.prototype = {
 
         if (this.resizable) {
             $(resizediv).mousedown(function (event) {
-                $('html').addClass('unselectable');
                 event.stopPropagation();
                 var downY = event.clientY;
-                $('html').bind('mousemove.genomeViewer', function (event) {
-                    var despY = (event.clientY - downY);
-                    var actualHeight = $(svgdiv).outerHeight();
-                    $(svgdiv).css({height: actualHeight + despY});
-                    downY = event.clientY;
-                    _this.autoHeight = false;
-                });
+                $('html')
+                    .addClass('unselectable')
+                    .bind('mousemove.genomeViewer', function (event) {
+                        var despY = (event.clientY - downY);
+                        var actualHeight = $(svgdiv).outerHeight();
+                        $(svgdiv).css({height: actualHeight + despY});
+                        downY = event.clientY;
+                        _this.autoHeight = false;
+                    });
             });
+
             $('html').bind('mouseup.genomeViewer', function (event) {
-                $('html').removeClass('unselectable');
-                $('html').off('mousemove.genomeViewer');
+                $('html').removeClass('unselectable').off('mousemove.genomeViewer');
             });
+
             $(svgdiv).closest(".trackListPanels").mouseup(function (event) {
                 _this.updateHeight();
             });
 
-
             $(resizediv).mouseenter(function (event) {
-                $(this).css({'cursor': 'ns-resize'});
-                $(this).css({'opacity': 1});
-            });
-            $(resizediv).mouseleave(function (event) {
-                $(this).css({'cursor': 'default'});
-                $(this).css({'opacity': 0.3});
+                $(this).css({'cursor': 'ns-resize', 'opacity': 1});
             });
 
+            $(resizediv).mouseleave(function (event) {
+                $(this).css({'cursor': 'default', 'opacity': 0.3});
+            });
         }
 
         this.svgGroup = SVG.addChild(main, "g", {
@@ -314,10 +316,10 @@ Track.prototype = {
             hoverRect.setAttribute('fill', 'transparent');
         };
 
-        $(this.svgGroup).off('mouseenter');
-        $(this.svgGroup).off('mouseleave');
-        $(this.svgGroup).mouseenter(this.fnTitleMouseEnter);
-        $(this.svgGroup).mouseleave(this.fnTitleMouseLeave);
+        $(this.svgGroup)
+            .off('mouseenter').off('mouseleave')
+            .mouseenter(this.fnTitleMouseEnter)
+            .mouseleave(this.fnTitleMouseLeave);
 
 
         this.invalidZoomText = SVG.addChild(this.svgGroup, 'text', {
@@ -333,7 +335,8 @@ Track.prototype = {
 
         var loadingImg =
             '<?xml version="1.0" encoding="utf-8"?>' +
-            '<svg version="1.1" width="22px" height="22px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
+            '<svg version="1.1" width="22px" height="22px" ' +
+            'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
             '<defs>' +
             '<g id="pair">' +
             '<ellipse cx="7" cy="0" rx="4" ry="1.7" style="fill:#ccc; fill-opacity:0.5;"/>' +
@@ -342,7 +345,8 @@ Track.prototype = {
             '</defs>' +
             '<g transform="translate(11,11)">' +
             '<g>' +
-            '<animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="1.5s" repeatDur="indefinite"/>' +
+            '<animateTransform attributeName="transform" type="rotate" ' +
+            'from="0" to="360" dur="1.5s" repeatDur="indefinite"/>' +
             '<use xlink:href="#pair"/>' +
             '<use xlink:href="#pair" transform="rotate(45)"/>' +
             '<use xlink:href="#pair" transform="rotate(90)"/>' +
@@ -350,7 +354,6 @@ Track.prototype = {
             '</g>' +
             '</g>' +
             '</svg>';
-
         this.svgLoading = SVG.addChildImage(main, {
             "xlink:href": "data:image/svg+xml," + encodeURIComponent(loadingImg),
             "x": 10,
@@ -359,6 +362,7 @@ Track.prototype = {
             "height": 22,
             "visibility": "hidden"
         });
+
 
         this.div = div;
         this.svgdiv = svgdiv;
@@ -372,6 +376,12 @@ Track.prototype = {
         this.rendered = true;
         this.status = "ready";
     },
+
+    draw: function () {
+
+    },
+
+
     _drawHistogramLegend: function () {
         var histogramHeight = this.histogramRenderer.histogramHeight;
         var multiplier = this.histogramRenderer.multiplier;
@@ -417,9 +427,7 @@ Track.prototype = {
         });
         text.textContent = "1000-";
     },
-    draw: function () {
 
-    },
     getFeaturesToRenderByChunk: function (response, filters) {
         //Returns an array avoiding already drawn features in this.chunksDisplayed
 
@@ -436,7 +444,8 @@ Track.prototype = {
 
         var feature, displayed, featureFirstChunk, featureLastChunk, features = [];
         for (var i = 0, leni = chunks.length; i < leni; i++) {
-            if (this.chunksDisplayed[chunks[i].chunkKey] != true) {//check if any chunk is already displayed and skip it
+            //check if any chunk is already displayed and skip it
+            if (this.chunksDisplayed[chunks[i].chunkKey] != true) {
 
                 for (var j = 0, lenj = chunks[i].value.length; j < lenj; j++) {
                     feature = chunks[i].value[j];
