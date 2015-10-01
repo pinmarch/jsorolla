@@ -22,64 +22,79 @@
 SequenceTrack.prototype = new Track({});
 
 function SequenceTrack(args) {
-    args.resizable = false;
-    Track.call(this, args);
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
     //set default args
+    args.resizable = false;
+    Track.call(this, args);
 
     _.extend(this, args);
 };
 
+
+SequenceTrack.prototype.getMetricsInfo = function() {
+
+    this.svgCanvasOffset = Math.floor((this.width * 3 / 2) / this.pixelBase);
+    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset;
+    this.svgCanvasRightLimit = this.region.end + this.svgCanvasOffset;
+
+    console.log('getMetricsInfo() called',
+        this.svgCanvasLeftLimit, this.svgCanvasRightLimit,
+        (this.svgCanvasRightLimit - this.svgCanvasLeftLimit), 'nt');
+
+    return {
+        svgCanvasFeatures: this.svgCanvasFeatures,
+        pixelBase: this.pixelBase,
+        region: this.region,
+        position: this.region.center(),
+        svgCanvasLeftLimit: this.svgCanvasLeftLimit,
+        svgCanvasRightLimit: this.svgCanvasRightLimit,
+        width: this.width,
+        pixelPosition: this.pixelPosition
+    };
+};
+
 SequenceTrack.prototype.render = function (targetId) {
     var _this = this;
+
     this.initializeDom(targetId);
 
-    this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
-    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
-    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
-
     this.dataAdapter.on('data:ready', function (event) {
-        _this.renderer.render(event, {
-            svgCanvasFeatures: _this.svgCanvasFeatures,
-            pixelBase: _this.pixelBase,
-            position: _this.region.center(),
-            width: _this.width,
-            pixelPosition: _this.pixelPosition
-        });
+        _this.renderer.render(event, _this.getMetricsInfo());
         _this.setLoading(false);
     });
 };
 
 SequenceTrack.prototype.draw = function () {
     var _this = this;
-    this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
-    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
-    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
+
+    this.getMetricsInfo();
 
     this.cleanSvg();
 
-    if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
+    if (typeof this.visibleRegionSize === 'undefined' ||
+        this.region.length() < this.visibleRegionSize) {
+
         this.setLoading(true);
         var data = this.dataAdapter.getData({
             region: new Region({
                 chromosome: this.region.chromosome,
-                start: this.region.start - this.svgCanvasOffset * 2,
-                end: this.region.end + this.svgCanvasOffset * 2
+                start: this.svgCanvasLeftLimit,
+                end: this.svgCanvasRightLimit
             })
         });
         this.invalidZoomText.setAttribute("visibility", "hidden");
     } else {
         this.invalidZoomText.setAttribute("visibility", "visible");
     }
-
-
 };
 
 
 SequenceTrack.prototype.move = function (disp) {
     var _this = this;
+
     var pixelDisplacement = disp * _this.pixelBase;
     this.pixelPosition -= pixelDisplacement;
 
@@ -91,31 +106,33 @@ SequenceTrack.prototype.move = function (disp) {
     var virtualEnd = parseInt(this.region.end + this.svgCanvasOffset);
 
     // check if track is visible in this region size
-    if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
+    if (typeof this.visibleRegionSize === 'undefined' ||
+        this.region.length() < this.visibleRegionSize) {
+
         if (disp > 0 && virtualStart < this.svgCanvasLeftLimit) {
+            var newLeft = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
             this.dataAdapter.getData({
                 region: new Region({
                     chromosome: _this.region.chromosome,
-                    start: parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset),
+                    start: newLeft,
                     end: this.svgCanvasLeftLimit
                 }),
                 sender: 'move'
             });
-            this.svgCanvasLeftLimit = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
+            this.svgCanvasLeftLimit = newLeft;
         }
 
         if (disp < 0 && virtualEnd > this.svgCanvasRightLimit) {
+            var newRight = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset);
             this.dataAdapter.getData({
                 region: new Region({
                     chromosome: _this.region.chromosome,
                     start: this.svgCanvasRightLimit,
-                    end: parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset),
+                    end: newRight,
                 }),
                 sender: 'move'
             });
-            this.svgCanvasRightLimit = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset);
+            this.svgCanvasRightLimit = newRight;
         }
-
     }
-
 };

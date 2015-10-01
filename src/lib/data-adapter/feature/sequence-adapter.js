@@ -56,7 +56,8 @@ SequenceAdapter.prototype.getData = function (args) {
     region.end = (region.end > 300000000) ? 300000000 : region.end;
 
     //clean when the new position is too far from current
-    if (region.start < this.start[chromosome] - 5000 || region.end > this.end[chromosome] + 5000) {
+    if (region.start < this.start[chromosome] - 5000 ||
+        region.end > this.end[chromosome] + 5000) {
         this.clearData();
     }
 
@@ -67,7 +68,8 @@ SequenceAdapter.prototype.getData = function (args) {
     var queryString = this._getSequenceQuery(region);
 
     if (queryString != "") {
-
+        var queryRegion = new Region(queryString);
+        console.log("region for query:", region, region.length(), "query:", queryRegion, queryRegion.length());
         CellBaseManager.get({
             host: this.host,
             species: this.species,
@@ -80,30 +82,18 @@ SequenceAdapter.prototype.getData = function (args) {
                 _this._processSequenceQuery(data, true);
             }
         });
-
-
     } else {
-        if (this.sender != "move") {
-            this.trigger('data:ready', {
-                items: {
-                    sequence: this.sequence[chromosome],
-                    start: this.start[chromosome],
-                    end: this.end[chromosome]
-                },
-                params: params
-            });
-            this.trigger('data:ready', {
-                items: {
-                    sequence: this.sequence[chromosome],
-                    start: this.start[chromosome],
-                    end: this.end[chromosome]
-                },
-                params: params,
-                sender: this
-            });
-        }
-    }
+        var region = new Region({
+            chromosome: chromosome,
+            start: this.start[chromosome],
+            end: this.end[chromosome]
+        });
+        region.sequence = this.sequence[chromosome];
+        var ev = {items: region, params: params};
+        if (this.sender == "move") { ev.sender = this; }
 
+        this.trigger('data:ready', ev);
+    }
 };
 
 SequenceAdapter.prototype._getSequenceQuery = function (region) {
@@ -112,26 +102,24 @@ SequenceAdapter.prototype._getSequenceQuery = function (region) {
 
     var s, e, query, querys = [];
     if (_this.start[chromosome] == null && _this.end[chromosome] == null) {
-        //args.start -= 100;
-        //args.end += 100;
         _this.start[chromosome] = region.start;
         _this.end[chromosome] = region.end;
         s = region.start;
         e = region.end;
-        query = chromosome + ":" + s + "-" + e;
+        query = region.toString();// chromosome + ":" + s + "-" + e;
         querys.push(query);
     } else {
         if (region.start < _this.start[chromosome] ) {
             s = region.start;
             e = _this.start[chromosome] - 1;
-            e = (e < 1) ? region.end = 1 : e;
+            e = (e < 1) ? region.end : e;
             _this.start[chromosome] = s;
             query = region.chromosome + ":" + s + "-" + e;
             querys.push(query);
         }
         if (region.end > _this.end[chromosome]) {
-            e = region.end;
             s = _this.end[chromosome] + 1;
+            e = region.end;
             _this.end[chromosome] = e;
             query = region.chromosome + ":" + s + "-" + e;
             querys.push(query);
@@ -172,12 +160,12 @@ SequenceAdapter.prototype._processSequenceQuery = function (data, throwNotify) {
         }
 
         if (this.sender == "move" && throwNotify == true) {
+            var region = new Region({
+                chromosome: chromosome, start: queryStart, end: queryEnd
+            });
+            region.sequence = seqResponse.sequence;
             this.trigger('data:ready', {
-                items: {
-                    sequence: seqResponse.sequence,
-                    start: queryStart,
-                    end: queryEnd
-                },
+                items: region,
                 params: params,
                 sender: this
             });
@@ -185,12 +173,12 @@ SequenceAdapter.prototype._processSequenceQuery = function (data, throwNotify) {
     }
 
     if (this.sender != "move" && throwNotify == true) {
+        var region = new Region({
+            chromosome: chromosome, start: this.start[chromosome], end: this.end[chromosome]
+        });
+        region.sequence = this.sequence[chromosome];
         this.trigger('data:ready', {
-            items: {
-                sequence: this.sequence[chromosome],
-                start: this.start[chromosome],
-                end: this.end[chromosome]
-            },
+            items: region,
             params: params,
             sender: this
         });
@@ -198,12 +186,12 @@ SequenceAdapter.prototype._processSequenceQuery = function (data, throwNotify) {
 };
 
 //Used by bam to get the mutations
-SequenceAdapter.prototype.getNucleotidByPosition = function (args) {
+SequenceAdapter.prototype.getNucleotidByPosition = function (region) {
     var _this = this;
-    if (args.start > 0 && args.end > 0) {
-        var queryString = this._getSequenceQuery(args);
 
-        var chromosome = args.chromosome;
+    if (region.start > 0 && region.end > 0) {
+        var queryString = this._getSequenceQuery(region);
+        var chromosome = region.chromosome;
 
         if (queryString != "") {
             var data = CellBaseManager.get({
@@ -219,7 +207,7 @@ SequenceAdapter.prototype.getNucleotidByPosition = function (args) {
             _this._processSequenceQuery(data);
         }
         if (this.sequence[chromosome] != null) {
-            var referenceSubStr = this.sequence[chromosome].substr((args.start - this.start[chromosome]), 1);
+            var referenceSubStr = this.sequence[chromosome].substr((region.start - this.start[chromosome]), 1);
             return referenceSubStr;
         } else {
             console.log("SequenceRender: this.sequence[chromosome] is undefined");

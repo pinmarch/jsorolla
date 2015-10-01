@@ -22,7 +22,8 @@
 SequenceRenderer.prototype = new Renderer({});
 
 function SequenceRenderer(args){
-    Renderer.call(this,args);
+    Renderer.call(this, args);
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
@@ -30,38 +31,45 @@ function SequenceRenderer(args){
     this.toolTipfontClass = 'ocb-font-default';
 
     _.extend(this, args);
-
 };
 
 
-SequenceRenderer.prototype.render = function(features, args) {
+SequenceRenderer.prototype.render = function(features, metrics) {
+    var halfWidth = metrics.width / 2,
+        start = features.items.start,
+        seqStart = start,
+        seqString = features.items.sequence,
+        seqLength = seqString.length;
 
-    console.time("Sequence render "+features.items.sequence.length);
-    var middle = args.width/2;
+    if (seqLength > metrics.svgCanvasRightLimit - metrics.svgCanvasLeftLimit) {
+        seqLength = metrics.svgCanvasRightLimit - metrics.svgCanvasLeftLimit;
+    }
 
-    var start = features.items.start;
-    var seqStart = features.items.start;
-    var seqString = features.items.sequence;
+    console.log('rendering ' + seqLength + 'nt(in ' + seqString.length + ') sequence');
+    console.time("Sequence render " + seqLength);
 
-    for ( var i = 0; i < seqString.length; i++) {
-        var x = args.pixelPosition+middle-((args.position-start)*args.pixelBase);
+    var x1 = metrics.pixelPosition + halfWidth - ((metrics.position - seqStart) * metrics.pixelBase);
+    var x2 = metrics.pixelPosition + halfWidth - ((metrics.position - (seqStart + seqLength)) * metrics.pixelBase);
+    console.log("from",x1,"to",x2);
+
+    for (var i = 0; i < seqLength; i++) {
+        var x = metrics.pixelPosition + halfWidth - ((metrics.position - start) * metrics.pixelBase);
         start++;
 
-        var text = SVG.addChild(args.svgCanvasFeatures,"text",{
-            'x':x+1,
-            'y':12,
-            'fill':SEQUENCE_COLORS[seqString.charAt(i)],
+        var text = SVG.addChild(metrics.svgCanvasFeatures, "text", {
+            'x': x + 1,
+            'y': 12,
+            'fill': SEQUENCE_COLORS[seqString.charAt(i)],
             'class': this.fontClass
         });
         text.textContent = seqString.charAt(i);
         $(text).qtip({
-            content:seqString.charAt(i)+" "+(seqStart+i).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")/*+'<br>'+phastCons[i]+'<br>'+phylop[i]*/,
-            position: {target: 'mouse', adjust: {x:15, y:0}, viewport: $(window), effect: false},
-            style: { width:true, classes: this.toolTipfontClass+' qtip-light qtip-shadow'}
+            content: seqString.charAt(i) + " " +
+                     (seqStart + i).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"),
+            position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
+            style: {width: true, classes: this.toolTipfontClass + ' qtip-light qtip-shadow'}
         });
     }
 
-    console.timeEnd("Sequence render "+features.items.sequence.length);
-//    this.trackSvgLayout.setNucleotidPosition(this.position);
-
+    console.timeEnd("Sequence render " + seqLength);
 };
