@@ -197,9 +197,10 @@ Track.prototype = {
     },
 
     cleanSvg: function (filters) {//clean
-        while (this.svgCanvasFeatures.firstChild) {
-            this.svgCanvasFeatures.removeChild(this.svgCanvasFeatures.firstChild);
-        }
+        $(this.svgCanvasFeatures).html('');
+        // while (this.svgCanvasFeatures.firstChild) {
+        //     this.svgCanvasFeatures.removeChild(this.svgCanvasFeatures.firstChild);
+        // }
         this.chunksDisplayed = {};
         this.renderedArea = {};
     },
@@ -277,16 +278,15 @@ Track.prototype = {
                 _this.updateHeight();
             });
 
-            $(resizediv).mouseenter(function (event) {
-                $(this).css({'cursor': 'ns-resize', 'opacity': 1});
-            });
-
-            $(resizediv).mouseleave(function (event) {
-                $(this).css({'cursor': 'default', 'opacity': 0.3});
-            });
+            $(resizediv)
+                .mouseenter(function (event) {
+                    $(this).css({'cursor': 'ns-resize', 'opacity': 1});
+                }).mouseleave(function (event) {
+                    $(this).css({'cursor': 'default', 'opacity': 0.3});
+                });
         }
 
-        this.svgGroup = SVG.addChild(main, "g", {
+        this.svgGroup = SVG.addChild(main, 'g', {
         });
 
         var text = this.title;
@@ -299,7 +299,10 @@ Track.prototype = {
             'fill': 'transparent'
         });
 
-        this.svgCanvasFeatures = SVG.addChild(this.svgGroup, 'svg', {
+        this.svgCanvasFrame = SVG.addChild(this.svgGroup, 'g', {
+        });
+
+        this.svgCanvasFeatures = SVG.addChild(this.svgCanvasFrame, 'svg', {
             'class': 'features',
             'x': -this.pixelPosition,
             'width': this.svgCanvasWidth,

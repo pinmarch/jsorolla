@@ -19,10 +19,9 @@
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-SequenceRenderer.prototype = new Renderer({});
+SequenceRenderer.prototype = new Renderer();
 
 function SequenceRenderer(args){
-    Renderer.call(this, args);
 
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
@@ -30,45 +29,54 @@ function SequenceRenderer(args){
     this.fontClass = 'ocb-font-ubuntumono ocb-font-size-16';
     this.toolTipfontClass = 'ocb-font-default';
 
+    this.renderedPosition = {};
+
     _.extend(this, args);
+    Renderer.call(this, args);
 };
 
 
 SequenceRenderer.prototype.render = function(features, metrics) {
     var halfWidth = metrics.width / 2,
-        start = features.items.start,
-        seqStart = start,
+        start = metrics.svgCanvasLeftLimit,
+        seqStart = features.items.start,
         seqString = features.items.sequence,
         seqLength = seqString.length;
 
     if (seqLength > metrics.svgCanvasRightLimit - metrics.svgCanvasLeftLimit) {
-        seqLength = metrics.svgCanvasRightLimit - metrics.svgCanvasLeftLimit;
+        seqLength = metrics.svgCanvasRightLimit - metrics.svgCanvasLeftLimit + 1;
     }
 
-    console.log('rendering ' + seqLength + 'nt(in ' + seqString.length + ') sequence');
+    console.log('rendering ' + seqLength + 'nt(in ' + seqString.length + ') sequence', metrics);
     console.time("Sequence render " + seqLength);
 
-    var x1 = metrics.pixelPosition + halfWidth - ((metrics.position - seqStart) * metrics.pixelBase);
-    var x2 = metrics.pixelPosition + halfWidth - ((metrics.position - (seqStart + seqLength)) * metrics.pixelBase);
-    console.log("from",x1,"to",x2);
+    var xConv = function (pos) {
+        return halfWidth + metrics.pixelPosition - metrics.pixelBase / 2 -
+               ((metrics.initialCenter - pos) * metrics.pixelBase);
+    };
 
+    console.log("position ", start, start + seqLength, ":: from ", xConv(start) ,"to ", xConv(start + seqLength));
     for (var i = 0; i < seqLength; i++) {
-        var x = metrics.pixelPosition + halfWidth - ((metrics.position - start) * metrics.pixelBase);
-        start++;
+        if (this.renderedPosition[start] == null) {
+            var x = xConv(start),
+                seqChar = seqString.charAt(metrics.svgCanvasLeftLimit - seqStart + i);
 
-        var text = SVG.addChild(metrics.svgCanvasFeatures, "text", {
-            'x': x + 1,
-            'y': 12,
-            'fill': SEQUENCE_COLORS[seqString.charAt(i)],
-            'class': this.fontClass
-        });
-        text.textContent = seqString.charAt(i);
-        $(text).qtip({
-            content: seqString.charAt(i) + " " +
-                     (seqStart + i).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"),
-            position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
-            style: {width: true, classes: this.toolTipfontClass + ' qtip-light qtip-shadow'}
-        });
+            var text = SVG.addChild(metrics.svgCanvasFeatures, "text", {
+                'x': x + 1,
+                'y': 12,
+                'fill': SEQUENCE_COLORS[seqChar],
+                'class': this.fontClass
+            });
+            text.textContent = seqChar;
+            $(text).qtip({
+                content: seqChar + " " +
+                         (start).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"),
+                position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
+                style: {width: true, classes: this.toolTipfontClass + ' qtip-light qtip-shadow'}
+            });
+            if ($(text).length > 0) this.renderedPosition[start] = !0;
+        }
+        start++;
     }
 
     console.timeEnd("Sequence render " + seqLength);

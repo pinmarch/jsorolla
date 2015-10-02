@@ -292,16 +292,16 @@ TrackListPanel.prototype = {
 
 
         $(this.div).mousemove(function (event) {
-            var centerPosition = _this.region.center();
-            var mid = _this.width / 2;
-            var mouseLineOffset = _this.pixelBase / 2;
-            var offsetX = (event.clientX - $(_this.tlTracksDiv).offset().left);
-            var cX = offsetX - mouseLineOffset;
-            var rcX = (cX / _this.pixelBase) | 0;
-            var pos = (rcX * _this.pixelBase) + (mid % _this.pixelBase) - 1;
-            $(_this.mouseLine).css({'left': pos});
+            var mid = _this.width / 2,
+                mouseLineOffset = _this.pixelBase / 2,
+                offsetX = (event.clientX - $(_this.tlTracksDiv).offset().left),
+                cX = offsetX - mouseLineOffset,
+                rcX = (cX / _this.pixelBase) | 0,
+                pos = (rcX * _this.pixelBase) + (mid % _this.pixelBase) - 1,
+                posOffset = (mid / _this.pixelBase) | 0,
+                centerPosition = _this.region.center();
 
-            var posOffset = (mid / _this.pixelBase) | 0;
+            $(_this.mouseLine).css({'left': pos});
             _this.mousePosition = centerPosition + rcX - posOffset;
             _this.trigger('mousePosition:change', {
                 mousePos: _this.mousePosition,

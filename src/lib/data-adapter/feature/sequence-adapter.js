@@ -48,9 +48,9 @@ SequenceAdapter.prototype.clearData = function () {
 SequenceAdapter.prototype.getData = function (args) {
     var _this = this;
 
-    this.sender = args.sender;
-    var region = args.region;
-    var chromosome = region.chromosome;
+    var sender = args.sender,
+        region = new Region(args.region),
+        chromosome = region.chromosome;
 
     region.start = (region.start < 1) ? 1 : region.start;
     region.end = (region.end > 300000000) ? 300000000 : region.end;
@@ -70,6 +70,7 @@ SequenceAdapter.prototype.getData = function (args) {
     if (queryString != "") {
         var queryRegion = new Region(queryString);
         console.log("region for query:", region, region.length(), "query:", queryRegion, queryRegion.length());
+
         CellBaseManager.get({
             host: this.host,
             species: this.species,
@@ -90,7 +91,7 @@ SequenceAdapter.prototype.getData = function (args) {
         });
         region.sequence = this.sequence[chromosome];
         var ev = {items: region, params: params};
-        if (this.sender == "move") { ev.sender = this; }
+        if (sender == "move") { ev.sender = this; }
 
         this.trigger('data:ready', ev);
     }

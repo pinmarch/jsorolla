@@ -29,26 +29,26 @@ function SequenceTrack(args) {
     //set default args
     args.resizable = false;
     Track.call(this, args);
-
-    _.extend(this, args);
 };
 
 
 SequenceTrack.prototype.getMetricsInfo = function() {
 
-    this.svgCanvasOffset = Math.floor((this.width * 3 / 2) / this.pixelBase);
+    this.svgCanvasOffset = Math.floor(this.width * 1.5 / this.pixelBase);
     this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset;
     this.svgCanvasRightLimit = this.region.end + this.svgCanvasOffset;
 
     console.log('getMetricsInfo() called',
         this.svgCanvasLeftLimit, this.svgCanvasRightLimit,
-        (this.svgCanvasRightLimit - this.svgCanvasLeftLimit), 'nt');
+        (this.svgCanvasRightLimit - this.svgCanvasLeftLimit), 'nt initialCenter:',
+        this.initialCenter);
 
     return {
         svgCanvasFeatures: this.svgCanvasFeatures,
         pixelBase: this.pixelBase,
         region: this.region,
         position: this.region.center(),
+        initialCenter: this.initialCenter,
         svgCanvasLeftLimit: this.svgCanvasLeftLimit,
         svgCanvasRightLimit: this.svgCanvasRightLimit,
         width: this.width,
@@ -67,12 +67,20 @@ SequenceTrack.prototype.render = function (targetId) {
     });
 };
 
-SequenceTrack.prototype.draw = function () {
-    var _this = this;
-
+SequenceTrack.prototype.resetSvg = function() {
+    console.log("resetSvg");
     this.getMetricsInfo();
 
     this.cleanSvg();
+    this.svgCanvasFrame.removeAttribute("transform");
+    this.initialCenter = this.region.center();
+    this.renderer.renderedPosition = {};
+};
+
+SequenceTrack.prototype.draw = function () {
+    var _this = this;
+
+    this.resetSvg();
 
     if (typeof this.visibleRegionSize === 'undefined' ||
         this.region.length() < this.visibleRegionSize) {
@@ -95,12 +103,14 @@ SequenceTrack.prototype.draw = function () {
 SequenceTrack.prototype.move = function (disp) {
     var _this = this;
 
-    var pixelDisplacement = disp * _this.pixelBase;
-    this.pixelPosition -= pixelDisplacement;
+    // var pixelDisplacement = disp * _this.pixelBase;
+    // this.pixelPosition -= disp * this.pixelBase;
 
     //parseFloat important
-    var move = parseFloat(this.svgCanvasFeatures.getAttribute("x")) + pixelDisplacement;
-    this.svgCanvasFeatures.setAttribute("x", move);
+    // var move = parseFloat(this.svgCanvasFeatures.getAttribute("x")) + pixelDisplacement;
+    // this.svgCanvasFeatures.setAttribute("x", move);
+    this.svgCanvasFrame.setAttribute("transform",
+        'translate(' + (this.initialCenter - this.region.center()) * this.pixelBase + ',0)');
 
     var virtualStart = parseInt(this.region.start - this.svgCanvasOffset);
     var virtualEnd = parseInt(this.region.end + this.svgCanvasOffset);
@@ -110,7 +120,7 @@ SequenceTrack.prototype.move = function (disp) {
         this.region.length() < this.visibleRegionSize) {
 
         if (disp > 0 && virtualStart < this.svgCanvasLeftLimit) {
-            var newLeft = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
+            var newLeft = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset * 2);
             this.dataAdapter.getData({
                 region: new Region({
                     chromosome: _this.region.chromosome,
@@ -123,7 +133,7 @@ SequenceTrack.prototype.move = function (disp) {
         }
 
         if (disp < 0 && virtualEnd > this.svgCanvasRightLimit) {
-            var newRight = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset);
+            var newRight = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset * 2);
             this.dataAdapter.getData({
                 region: new Region({
                     chromosome: _this.region.chromosome,
