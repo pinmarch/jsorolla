@@ -68,7 +68,6 @@ SequenceTrack.prototype.render = function (targetId) {
 };
 
 SequenceTrack.prototype.resetSvg = function() {
-    console.log("resetSvg");
     this.getMetricsInfo();
 
     this.cleanSvg();
@@ -103,12 +102,6 @@ SequenceTrack.prototype.draw = function () {
 SequenceTrack.prototype.move = function (disp) {
     var _this = this;
 
-    // var pixelDisplacement = disp * _this.pixelBase;
-    // this.pixelPosition -= disp * this.pixelBase;
-
-    //parseFloat important
-    // var move = parseFloat(this.svgCanvasFeatures.getAttribute("x")) + pixelDisplacement;
-    // this.svgCanvasFeatures.setAttribute("x", move);
     this.svgCanvasFrame.setAttribute("transform",
         'translate(' + (this.initialCenter - this.region.center()) * this.pixelBase + ',0)');
 

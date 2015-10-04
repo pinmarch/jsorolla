@@ -47,7 +47,7 @@ SequenceRenderer.prototype.render = function(features, metrics) {
         seqLength = metrics.svgCanvasRightLimit - metrics.svgCanvasLeftLimit + 1;
     }
 
-    console.log('rendering ' + seqLength + 'nt(in ' + seqString.length + ') sequence', metrics);
+    // console.log('rendering ' + seqLength + 'nt(in ' + seqString.length + ') sequence', metrics);
     console.time("Sequence render " + seqLength);
 
     var xConv = function (pos) {
@@ -55,7 +55,7 @@ SequenceRenderer.prototype.render = function(features, metrics) {
                ((metrics.initialCenter - pos) * metrics.pixelBase);
     };
 
-    console.log("position ", start, start + seqLength, ":: from ", xConv(start) ,"to ", xConv(start + seqLength));
+    // console.log("position ", start, start + seqLength, ":: from ", xConv(start) ,"to ", xConv(start + seqLength));
     for (var i = 0; i < seqLength; i++) {
         if (this.renderedPosition[start] == null) {
             var x = xConv(start),
@@ -68,13 +68,13 @@ SequenceRenderer.prototype.render = function(features, metrics) {
                 'class': this.fontClass
             });
             text.textContent = seqChar;
-            $(text).qtip({
-                content: seqChar + " " +
-                         (start).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"),
-                position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
-                style: {width: true, classes: this.toolTipfontClass + ' qtip-light qtip-shadow'}
-            });
-            if ($(text).length > 0) this.renderedPosition[start] = !0;
+            // $(text).qtip({
+            //     content: seqChar + " " +
+            //              (start).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"),
+            //     position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
+            //     style: {width: true, classes: this.toolTipfontClass + ' qtip-light qtip-shadow'}
+            // });
+            if ($(text).length > 0) { this.renderedPosition[start] = !0; }
         }
         start++;
     }

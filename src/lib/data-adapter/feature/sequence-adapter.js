@@ -105,9 +105,7 @@ SequenceAdapter.prototype._getSequenceQuery = function (region) {
     if (_this.start[chromosome] == null && _this.end[chromosome] == null) {
         _this.start[chromosome] = region.start;
         _this.end[chromosome] = region.end;
-        s = region.start;
-        e = region.end;
-        query = region.toString();// chromosome + ":" + s + "-" + e;
+        query = region.toString();
         querys.push(query);
     } else {
         if (region.start < _this.start[chromosome] ) {
