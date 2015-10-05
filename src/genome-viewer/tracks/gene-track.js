@@ -19,163 +19,106 @@
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-GeneTrack.prototype = new Track({});
-
 function GeneTrack(args) {
-    Track.call(this, args);
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
     //set default args
     this.minTranscriptRegionSize;
-
-    //save default render reference;
-    this.defaultRenderer = this.renderer;
-//    this.histogramRenderer = new FeatureClusterRenderer();
-    this.histogramRenderer = new HistogramRenderer(args);
-
+    this.exclude;
 
     //set instantiation args, must be last
     _.extend(this, args);
 
-    this.exclude;
+    //save default render reference;
+    this.defaultRenderer = this.renderer;
+    this.histogramRenderer = new HistogramRenderer(args);
 
+    Track.call(this, args);
 };
 
-GeneTrack.prototype.render = function (targetId) {
-    var _this = this;
-    this.initializeDom(targetId);
+GeneTrack.prototype = new Track();
 
-    this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
-    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
-    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
+_.extend(GeneTrack.prototype, {
+    render: function (targetId) {
+        var _this = this;
 
-    this.dataAdapter.on('data:ready', function (event) {
-        var features;
-        if (event.dataType == 'histogram') {
-            _this.renderer = _this.histogramRenderer;
-            features = event.items;
-        } else {
-            _this.renderer = _this.defaultRenderer;
-            features = _this.getFeaturesToRenderByChunk(event);
-        }
-        _this.renderer.render(features, {
-            svgCanvasFeatures: _this.svgCanvasFeatures,
-            featureTypes: _this.featureTypes,
-            renderedArea: _this.renderedArea,
-            pixelBase: _this.pixelBase,
-            position: _this.region.center(),
-            regionSize: _this.region.length(),
-            maxLabelRegionSize: _this.maxLabelRegionSize,
-            width: _this.width,
-            pixelPosition: _this.pixelPosition
+        this.initializeDom(targetId);
 
-        });
-        _this.updateHeight();
-        _this.setLoading(false);
-    });
+        this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
+        this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
+        this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
 
-    this.renderer.on('feature:click', function (event) {
-        _this.showInfoWidget(event);
-    });
-};
+        this.dataAdapter.on('data:ready', function (event) {
+            var features;
 
-GeneTrack.prototype.updateTranscriptParams = function () {
-    if (this.region.length() < this.minTranscriptRegionSize) {
-        this.exclude = this.dataAdapter.params.exclude;
-    } else {
-        this.exclude = 'transcripts';
-    }
-};
-
-GeneTrack.prototype.draw = function () {
-    var _this = this;
-
-    this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
-    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
-    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2;
-
-    this.updateTranscriptParams();
-    this.updateHistogramParams();
-    this.cleanSvg();
-
-    var dataType = 'features';
-
-    if (!_.isUndefined(this.exclude)) {
-        dataType = 'features' + this.exclude;
-    }
-
-    if (this.histogram) {
-        dataType = 'histogram';
-    }
-
-
-    if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
-        this.setLoading(true);
-        var data = this.dataAdapter.getData({
-            dataType: dataType,
-            region: new Region({
-                chromosome: this.region.chromosome,
-                start: this.region.start - this.svgCanvasOffset * 2,
-                end: this.region.end + this.svgCanvasOffset * 2
-            }),
-            params: {
-                histogram: this.histogram,
-                histogramLogarithm: this.histogramLogarithm,
-                histogramMax: this.histogramMax,
-                interval: this.interval,
-                exclude: this.exclude
+            if (event.dataType == 'histogram') {
+                _this.renderer = _this.histogramRenderer;
+                features = event.items;
+            } else {
+                _this.renderer = _this.defaultRenderer;
+                features = _this.getFeaturesToRenderByChunk(event);
             }
+
+            _this.renderer.render(features, {
+                svgCanvasFeatures: _this.svgCanvasFeatures,
+                featureTypes: _this.featureTypes,
+                renderedArea: _this.renderedArea,
+                pixelBase: _this.pixelBase,
+                position: _this.region.center(),
+                regionSize: _this.region.length(),
+                maxLabelRegionSize: _this.maxLabelRegionSize,
+                width: _this.width,
+                pixelPosition: _this.pixelPosition
+
+            });
+
+            _this.updateHeight();
+            _this.setLoading(false);
         });
+    },
 
-        this.invalidZoomText.setAttribute("visibility", "hidden");
-    } else {
-        this.invalidZoomText.setAttribute("visibility", "visible");
-    }
-    _this.updateHeight();
-};
+    updateTranscriptParams: function () {
+        if (this.region.length() < this.minTranscriptRegionSize) {
+            this.exclude = this.dataAdapter.params.exclude;
+        } else {
+            this.exclude = 'transcripts';
+        }
+    },
+
+    draw: function () {
+        var _this = this;
+
+        this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
+        this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
+        this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2;
+
+        this.updateTranscriptParams();
+        this.updateHistogramParams();
+        this.cleanSvg();
+
+        var dataType = 'features';
+
+        if (!_.isUndefined(this.exclude)) {
+            dataType = 'features' + this.exclude;
+        }
+
+        if (this.histogram) {
+            dataType = 'histogram';
+        }
 
 
-GeneTrack.prototype.move = function (disp) {
-    var _this = this;
+        if (typeof this.visibleRegionSize === 'undefined' ||
+            this.region.length() < this.visibleRegionSize) {
 
-    this.dataType = 'features';
-
-    if (!_.isUndefined(this.exclude)) {
-        dataType = 'features' + this.exclude;
-    }
-
-    if (this.histogram) {
-        this.dataType = 'histogram';
-    }
-
-//    trackSvg.position = _this.region.center();
-    _this.region.center();
-    var pixelDisplacement = disp * _this.pixelBase;
-    this.pixelPosition -= pixelDisplacement;
-
-    //parseFloat important
-    var move = parseFloat(this.svgCanvasFeatures.getAttribute("x")) + pixelDisplacement;
-    this.svgCanvasFeatures.setAttribute("x", move);
-
-    var virtualStart = parseInt(this.region.start - this.svgCanvasOffset);
-    var virtualEnd = parseInt(this.region.end + this.svgCanvasOffset);
-    // check if track is visible in this zoom
-
-//    console.log(virtualStart+'  ----  '+virtualEnd)
-//    console.log(this.svgCanvasLeftLimit+'  ----  '+this.svgCanvasRightLimit)
-//    console.log(this.svgCanvasOffset)
-
-    if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
-
-        if (disp > 0 && virtualStart < this.svgCanvasLeftLimit) {
-            console.log('left')
-            this.dataAdapter.getData({
-                dataType: this.dataType,
+            this.setLoading(true);
+            var data = this.dataAdapter.getData({
+                dataType: dataType,
                 region: new Region({
-                    chromosome: _this.region.chromosome,
-                    start: parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset),
-                    end: this.svgCanvasLeftLimit
+                    chromosome: this.region.chromosome,
+                    start: this.region.start - this.svgCanvasOffset * 2,
+                    end: this.region.end + this.svgCanvasOffset * 2
                 }),
                 params: {
                     histogram: this.histogram,
@@ -185,40 +128,79 @@ GeneTrack.prototype.move = function (disp) {
                     exclude: this.exclude
                 }
             });
-            this.svgCanvasLeftLimit = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
+
+            this.invalidZoomText.setAttribute("visibility", "hidden");
+        } else {
+            this.invalidZoomText.setAttribute("visibility", "visible");
         }
 
-        if (disp < 0 && virtualEnd > this.svgCanvasRightLimit) {
-            console.log('right')
-            this.dataAdapter.getData({
-                dataType: this.dataType,
-                region: new Region({
-                    chromosome: _this.region.chromosome,
-                    start: this.svgCanvasRightLimit,
-                    end: parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset)
-                }),
-                params: {
-                    histogram: this.histogram,
-                    histogramLogarithm: this.histogramLogarithm,
-                    histogramMax: this.histogramMax,
-                    interval: this.interval,
-                    exclude: this.exclude
-                }
-            });
-            this.svgCanvasRightLimit = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset);
+        _this.updateHeight();
+    },
+
+    move: function (disp) {
+        var _this = this;
+
+        this.dataType = 'features';
+
+        if (!_.isUndefined(this.exclude)) {
+            dataType = 'features' + this.exclude;
+        }
+        if (this.histogram) {
+            this.dataType = 'histogram';
+        }
+
+        var pixelDisplacement = disp * _this.pixelBase;
+        this.pixelPosition -= pixelDisplacement;
+
+        //parseFloat important
+        var move = parseFloat(this.svgCanvasFeatures.getAttribute("x")) + pixelDisplacement;
+        this.svgCanvasFeatures.setAttribute("x", move);
+
+        var virtualStart = parseInt(this.region.start - this.svgCanvasOffset);
+        var virtualEnd = parseInt(this.region.end + this.svgCanvasOffset);
+
+        if (typeof this.visibleRegionSize === 'undefined' ||
+            this.region.length() < this.visibleRegionSize) {
+
+            if (disp > 0 && virtualStart < this.svgCanvasLeftLimit) {
+                var newLeft = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
+                this.dataAdapter.getData({
+                    dataType: this.dataType,
+                    region: new Region({
+                        chromosome: _this.region.chromosome,
+                        start: newLeft,
+                        end: this.svgCanvasLeftLimit
+                    }),
+                    params: {
+                        histogram: this.histogram,
+                        histogramLogarithm: this.histogramLogarithm,
+                        histogramMax: this.histogramMax,
+                        interval: this.interval,
+                        exclude: this.exclude
+                    }
+                });
+                this.svgCanvasLeftLimit = newLeft;
+            }
+
+            if (disp < 0 && virtualEnd > this.svgCanvasRightLimit) {
+                var newRight = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset);
+                this.dataAdapter.getData({
+                    dataType: this.dataType,
+                    region: new Region({
+                        chromosome: _this.region.chromosome,
+                        start: this.svgCanvasRightLimit,
+                        end: newRight
+                    }),
+                    params: {
+                        histogram: this.histogram,
+                        histogramLogarithm: this.histogramLogarithm,
+                        histogramMax: this.histogramMax,
+                        interval: this.interval,
+                        exclude: this.exclude
+                    }
+                });
+                this.svgCanvasRightLimit = newRight;
+            }
         }
     }
-};
-
-GeneTrack.prototype.showInfoWidget = function (args) {
-    switch (args.featureType) {
-        case "gene":
-            new GeneInfoWidget(null, this.dataAdapter.species).draw(args);
-            break;
-        case "transcript":
-            new TranscriptInfoWidget(null, this.dataAdapter.species).draw(args);
-            break;
-        default:
-            break;
-    }
-};
+});
