@@ -30,6 +30,7 @@ function ChromosomePanel(args) {
     this.species = 'hsapiens';
     this.width = 600;
     this.height = 75;
+    this.sideMargin = 20;
     this.collapsed = false;
     this.collapsible = false;
 
@@ -203,13 +204,17 @@ ChromosomePanel.prototype = {
             _this.hideContent();
         }
     },
+
     _drawSvg: function (chromosome) {
         // This method uses less svg elements
         var _this = this;
-        var offset = 20;
+
+        var offset = this.sideMargin,
+            innerWidth = this.width - this.sideMargin * 3;
+
         var group = SVG.addChild(_this.svg, "g", {"cursor": "pointer"});
         this.chromosomeLength = chromosome.size;
-        this.pixelBase = (this.width - 40) / this.chromosomeLength;
+        this.pixelBase = innerWidth / this.chromosomeLength;
 
         /**/
         /*Draw Chromosome*/
@@ -217,7 +222,7 @@ ChromosomePanel.prototype = {
         var backrect = SVG.addChild(group, 'rect', {
             'x': offset,
             'y': 4,
-            'width': this.width - 40 + 1,
+            'width': innerWidth + 1,
             'height': 22,
             'fill': '#555555'
         });
@@ -230,7 +235,7 @@ ChromosomePanel.prototype = {
             cytoband.pixelEnd = cytoband.end * this.pixelBase;
             cytoband.pixelSize = cytoband.pixelEnd - cytoband.pixelStart;
 
-            if (typeof cytobandsByStain[cytoband.stain] == 'undefined') {
+            if (typeof cytobandsByStain[cytoband.stain] === 'undefined') {
                 cytobandsByStain[cytoband.stain] = [];
             }
             cytobandsByStain[cytoband.stain].push(cytoband);
@@ -318,7 +323,7 @@ ChromosomePanel.prototype = {
 
         var positionBoxWidth = _this.region.length() * _this.pixelBase;
         var positionGroup = SVG.addChild(group, 'g');
-        this.positionBox = SVG.addChild(positionGroup, 'rect', {
+        var posbox = SVG.addChild(positionGroup, 'rect', {
             'x': pointerPosition - (positionBoxWidth / 2),
             'y': 2,
             'width': positionBoxWidth,
@@ -329,10 +334,10 @@ ChromosomePanel.prototype = {
             'fill': 'navajowhite',
             'cursor': 'move'
         });
-        var posbox = this.positionBox;
         $(posbox).on('mousedown', function (event) {
             status = 'movePositionBox';
         });
+        this.positionBox = posbox;
 
 
         var resizeLeft = SVG.addChild(positionGroup, 'rect', {
@@ -385,7 +390,7 @@ ChromosomePanel.prototype = {
         var recalculatePositionBox = function () {
             var genomicLength = _this.region.length(),
                 pixelWidth = genomicLength * _this.pixelBase,
-                x = (_this.region.start * _this.pixelBase) + 20;//20 is the margin
+                x = (_this.region.start * _this.pixelBase) + _this.sideMargin;//20 is the margin
             posbox.setAttribute("x", x);
             posbox.setAttribute("width", pixelWidth);
         };
@@ -485,7 +490,7 @@ ChromosomePanel.prototype = {
                             var bioS = (pixS - offset) / _this.pixelBase;
                             var bioE = (pixE - offset) / _this.pixelBase;
                             // returns object with start and end
-                            var se = limitRegionToChromosome({start:bioS,end:bioE});
+                            var se = limitRegionToChromosome({start: bioS, end: bioE});
 
                             _this.region.start = Math.round(se.start);
                             _this.region.end = Math.round(se.end);
@@ -518,10 +523,10 @@ ChromosomePanel.prototype = {
                     case 'selectingRegion' :
                         var bioS = (downX - offset) / _this.pixelBase;
                         var bioE = (moveX - offset) / _this.pixelBase;
-                        var start = Math.min(bioS,bioE);
-                        var end = Math.max(bioS,bioE);
+                        var start = Math.min(bioS, bioE);
+                        var end = Math.max(bioS, bioE);
                         // returns object with start and end
-                        var se = limitRegionToChromosome({start:start,end:end});
+                        var se = limitRegionToChromosome({start: start, end: end});
 
                         _this.region.start = parseInt(se.start);
                         _this.region.end = parseInt(se.end);
@@ -553,6 +558,7 @@ ChromosomePanel.prototype = {
             selectingRegion = false;
         });
     },
+
     setRegion: function (region) {//item.chromosome, item.region
         this.region.load(region);
         var needDraw = false;
@@ -567,7 +573,7 @@ ChromosomePanel.prototype = {
         //recalculate positionBox
         var genomicLength = this.region.length(),
             pixelWidth = genomicLength * this.pixelBase,
-            x = (this.region.start * this.pixelBase) + 20;//20 is the margin
+            x = (this.region.start * this.pixelBase) + this.sideMargin;//20 is the margin
         this.positionBox.setAttribute("x", x);
         this.positionBox.setAttribute("width", pixelWidth);
     }
