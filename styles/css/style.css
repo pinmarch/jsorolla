@@ -175,6 +175,10 @@
     padding: 4px;
 }
 
+.gvtrack-titlebardiv.gvtrack-content-hidden {
+    position: relative;
+}
+
 .gvtrack-svgdiv {
     z-index: 3;
     overflow-y: hidden;

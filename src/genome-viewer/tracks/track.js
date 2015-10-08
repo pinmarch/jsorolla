@@ -91,6 +91,7 @@ Track.prototype = {
         if (completely) {
             $(this.titlediv).css({display: 'none'});
         } else {
+            $(this.div).find('.gvtrack-titlebardiv').addClass('gvtrack-content-hidden');
             $(this.resizeDiv).css({display: 'none'});
             $(this.configBtn).css({display: 'none'});
         }
@@ -101,6 +102,7 @@ Track.prototype = {
         if (completely) {
             $(this.titlediv).css({display: 'inherit'});
         } else {
+            $(this.div).find('.gvtrack-titlebardiv').removeClass('gvtrack-content-hidden');
             $(this.resizeDiv).css({display: 'inherit'});
             $(this.configBtn).css({display: 'inherit'});
         }
