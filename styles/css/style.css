@@ -145,7 +145,7 @@
     line-height: normal;
 }
 
-.gv-panel-title {
+.gvtrack-panel-title {
     font-family: tahoma, arial, verdana, sans-serif;
     font-weight: bold;
     color: #333;
@@ -170,6 +170,29 @@
 }
 
 
+.gvtrack-panelroot {
+    position: relative;
+    height:100%;
+}
+
+.gvtrack-panel-title-label {
+    display: inline-block;
+    line-height: 24px;
+    margin-left: 5px;
+    width: 120px;
+}
+
+.gvtrack-panel-collapsebtn {
+    display: inline;
+    margin: 2px;
+    height: 20px;
+}
+
+.gvtrack-window-size-span {
+    display: inline;
+    margin-left: 35%;
+}
+
 .gvtrack-titlebardiv {
     position: absolute;
     padding: 4px;
@@ -177,6 +200,60 @@
 
 .gvtrack-titlebardiv.gvtrack-content-hidden {
     position: relative;
+}
+
+.gvtrack-centerline {
+    z-index: 2;
+    position: absolute;
+    top: 0;
+    height: calc(100% - 8px);
+    opacity: 0.5;
+    border: 1px solid orangered;
+    background-color: orange;
+}
+
+.gvtrack-mouselinebox {
+    z-index: 1;
+    position: absolute;
+    left: -20px;
+    top: 0;
+    height: calc(100% - 8px);
+    border: 1px solid lightgray;
+    opacity: 0.7;
+    visibility: hidden;
+    background-color: gainsboro;
+}
+
+.gvtrack-selbox {
+    z-index: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    border: 2px solid deepskyblue;
+    opacity: 0.5;
+    visibility: hidden;
+    background-color: honeydew;
+}
+
+.gvtrack-regionoverviewbox {
+    z-index: 0;
+    position: absolute;
+    top: 0;
+    height: calc(100% - 8px);
+    border: 1px solid gray;
+    opacity: 0.5;
+    background-color: lightgray;
+}
+
+.gvtrack-paneldiv {
+    position: relative;
+    width: 100%;
+}
+
+.gvtrack-paneltracksdiv {
+    position: relative;
+    z-index: 3;
 }
 
 .gvtrack-svgdiv {

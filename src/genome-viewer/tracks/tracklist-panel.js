@@ -121,26 +121,23 @@ TrackListPanel.prototype = {
             return;
         }
 
-        this.div = $('<div id="' + this.id + '" style="height:100%;position: relative;"></div>')[0];
+        this.div = $('<div id="' + this.id + '" class="gvtrack-panelroot"></div>')[0];
         $(this.targetDiv).append(this.div);
 
         if ('title' in this && this.title !== '') {
             var titleDiv = $(
-                '<div id="' + this.id + 'tl-title" class="gv-panel-title unselectable">' +
-                '<div style="display:inline-block;line-height: 24px;margin-left: 5px;width:120px">' +
+                '<div id="' + this.id + '-tl-title" class="gvtrack-panel-title unselectable">' +
+                '<div class="gvtrack-panel-title-label">' +
                 this.title + '</div></div>'
                 )[0];
-            var windowSizeDiv = $(
-                '<div style="display:inline;margin-left:35%" class="gv-window-size-span"></div>'
-                );
+            var windowSizeDiv = $('<div class="gvtrack-window-size-span"></div>');
             $(titleDiv).append(windowSizeDiv);
             $(this.div).append(titleDiv);
 
             if (this.collapsible == true) {
                 this.collapseDiv = $(
-                    '<div type="button" class="btn btn-default btn-xs pull-right" ' +
-                    'style="display:inline;margin:2px;height:20px">' +
-                    '<span class="glyphicon glyphicon-minus"></span></div>'
+                    '<div class="btn btn-default btn-xs pull-right gvtrack-panel-collapsebtn" ' +
+                    'type="button"><span class="glyphicon glyphicon-minus"></span></div>'
                     );
                 $(titleDiv).dblclick(function () {
                     if (_this.collapsed) {
@@ -160,16 +157,12 @@ TrackListPanel.prototype = {
             }
         }
 
-        var tlHeaderDiv = $('<div id="' + this.id + 'tl-header" class="unselectable"></div>')[0];
-        var panelDiv = $('<div id="' + this.id + 'tl-panel"></div>')[0];
-        this.tlTracksDiv = $('<div id="' + this.id + 'tl-tracks"></div>')[0];
+        var tlHeaderDiv = $('<div id="' + this.id + '-tl-header" class="unselectable"></div>')[0];
+        var panelDiv = $('<div id="' + this.id + '-tl-panel" class="gvtrack-paneldiv"></div>')[0];
+        this.tlTracksDiv = $('<div id="' + this.id + '-tl-tracks" class="gvtrack-paneltracksdiv"></div>')[0];
 
-        $(panelDiv).css({position: 'relative', width: '100%'});
-        $(this.tlTracksDiv).css({ position: 'relative', 'z-index': 3});
-
-        $(this.div).append(tlHeaderDiv);
-        $(this.div).append(panelDiv);
         $(panelDiv).append(this.tlTracksDiv);
+        $(this.div).append(tlHeaderDiv).append(panelDiv);
 
 
         //Main SVG and his events
@@ -214,78 +207,39 @@ TrackListPanel.prototype = {
         this._setTextPosition();
 
 
-        this.centerLine = $('<div id="' + this.id + 'centerLine"></div>')[0];
+        this.centerLine = $('<div id="' + this.id + '-centerLine" class="gvtrack-centerline"></div>')[0];
         $(panelDiv).append(this.centerLine);
         $(this.centerLine).css({
-            'z-index': 2,
-            'position': 'absolute',
             'left': mid - 1,
-            'top': 0,
-            'width': this.pixelBase,
-            'height': 'calc(100% - 8px)',
-            'opacity': 0.5,
-            'border': '1px solid orangered',
-            'background-color': 'orange'
+            'width': this.pixelBase
         });
 
 
-        this.mouseLine = $('<div id="' + this.id + 'mouseLine"></div>')[0];
+        this.mouseLine = $('<div id="' + this.id + '-mouseLine"></div>')[0];
         $(panelDiv).append(this.mouseLine);
-        $(this.mouseLine).css({
-            'z-index': 1,
-            'position': 'absolute',
-            'left': -20,
-            'top': 0,
-            'width': this.pixelBase,
-            'height': 'calc(100% - 8px)',
-            'border': '1px solid lightgray',
-            'opacity': 0.7,
-            'visibility': 'hidden',
-            'background-color': 'gainsboro'
+        $(this.mouseLine).addClass('gvtrack-mouselinebox').css({
+            'width': this.pixelBase
         });
 
         //allow selection in trackSvgLayoutOverview
 
-        var selBox = $('<div id="' + this.id + 'selBox"></div>')[0];
+        var selBox = $('<div id="' + this.id + '-selBox" class="gvtrack-selbox"></div>')[0];
         $(panelDiv).append(selBox);
-        $(selBox).css({
-            'z-index': 0,
-            'position': 'absolute',
-            'left': 0,
-            'top': 0,
-            'height': '100%',
-            'border': '2px solid deepskyblue',
-            'opacity': 0.5,
-            'visibility': 'hidden',
-            'background-color': 'honeydew'
-        });
 
         if (this.showRegionOverviewBox) {
-            var regionOverviewBoxLeft = $('<div id="' + this.id + 'regionOverviewBoxLeft"></div>')[0];
-            var regionOverviewBoxRight = $('<div id="' + this.id + 'regionOverviewBoxRight"></div>')[0];
-            var regionOverviewBoxWidth = this.region.length() * this.pixelBase;
-            var regionOverviewDarkBoxWidth = (this.width - regionOverviewBoxWidth) / 2
-            $(regionOverviewBoxLeft).css({
-                'z-index': 0,
-                'position': 'absolute',
+            var regionOverviewBoxLeft = $('<div id="' + this.id + '-regionOverviewBoxLeft"></div>')[0],
+                regionOverviewBoxRight = $('<div id="' + this.id + '-regionOverviewBoxRight"></div>')[0],
+                regionOverviewBoxWidth = this.region.length() * this.pixelBase,
+                regionOverviewDarkBoxWidth = (this.width - regionOverviewBoxWidth) / 2;
+
+            $(regionOverviewBoxLeft).addClass('gvtrack-regionoverviewbox').css({
                 'left': 1,
-                'top': 0,
-                'width': regionOverviewDarkBoxWidth,
-                'height': 'calc(100% - 8px)',
-                'border': '1px solid gray',
-                'opacity': 0.5,
-                'background-color': 'lightgray'
+                'width': regionOverviewDarkBoxWidth
             });
-            $(regionOverviewBoxRight).css({
-                'z-index': 0,
-                'position': 'absolute',
-                'left': (regionOverviewDarkBoxWidth + regionOverviewBoxWidth),
-                'top': 0,
-                'width': regionOverviewDarkBoxWidth,
-                'height': 'calc(100% - 8px)',
-                'border': '1px solid gray',
-                'opacity': 0.5,
-                'background-color': 'lightgray'
+            $(regionOverviewBoxRight).addClass('gvtrack-regionoverviewbox').css({
+                // 'left': (regionOverviewDarkBoxWidth + regionOverviewBoxWidth),
+                'right': 1,
+                'width': regionOverviewDarkBoxWidth
             });
             $(panelDiv).append(regionOverviewBoxLeft).append(regionOverviewBoxRight);
         }
@@ -475,13 +429,20 @@ TrackListPanel.prototype = {
     },
 
     setWidth: function (width) {
-        console.log(width);
+        console.log("Resize, width to", width);
+
         this.width = width - 18;
         var mid = this.width / 2;
         this._setPixelBase();
 
         $(this.centerLine).css({'left': mid - 1, 'width': this.pixelBase});
         $(this.mouseLine).css({'width': this.pixelBase});
+
+        if (this.showRegionOverviewBox) {
+            var regionOverviewBoxWidth = this.region.length() * this.pixelBase,
+                regionOverviewDarkBoxWidth = (this.width - regionOverviewBoxWidth) / 2;
+            $(this.panelDiv).find('.gvtrack-regionoverviewbox').width(regionOverviewDarkBoxWidth);
+        }
 
         this.svgTop.setAttribute('width', this.width);
         this.positionText.setAttribute("x", mid - 30);
@@ -826,7 +787,7 @@ TrackListPanel.prototype = {
 
         this.windowSize = "Window size: " + Utils.formatNumber(this.visualRegion.length()) + " nts";
         this.viewNtsText.textContent = this.windowSize;
-        $(this.div).find('.gv-window-size-span').html(this.windowSize);
+        $(this.div).find('.gvtrack-window-size-span').html(this.windowSize);
     },
 
     getTrackSvgById: function (trackId) {
