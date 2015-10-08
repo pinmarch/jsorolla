@@ -20,31 +20,34 @@
  */
 
 //any item with chromosome start end
-FeatureRenderer.prototype = new Renderer({});
+FeatureRenderer.prototype = new Renderer();
 
 function FeatureRenderer(args) {
     Renderer.call(this, args);
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
     this.fontClass = 'ocb-font-sourcesanspro ocb-font-size-12';
     this.toolTipfontClass = 'ocb-font-default';
 
-     if (_.isObject(args)) {
-        _.extend(this, args);
-    }
+    _.extend(this, args);
 
     this.on(this.handlers);
 };
 
 
-FeatureRenderer.prototype.render = function (features, args) {
+_.extend(FeatureRenderer.prototype, {
+
+render: function (features, args) {
     var _this = this;
+
     var draw = function (feature, svgGroup) {
 
         if (typeof feature.featureType === 'undefined') {
             feature.featureType = args.featureType;
         }
+
         //get feature render configuration
         var color = _.isFunction(_this.color) ? _this.color(feature) : _this.color;
         var label = _.isFunction(_this.label) ? _this.label(feature) : _this.label;
@@ -118,7 +121,6 @@ FeatureRenderer.prototype.render = function (features, args) {
                 if ('tooltipText' in _this) {
                     $(featureGroup).qtip({
                         content: {text: tooltipText, title: tooltipTitle},
-//                        position: {target: "mouse", adjust: {x: 15, y: 0}, effect: false},
                         position: {target: "mouse", adjust: {x: 25, y: 15}},
                         style: { width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'}
                     });
@@ -156,4 +158,5 @@ FeatureRenderer.prototype.render = function (features, args) {
     /****/
     console.timeEnd(timeId);
     /****/
-};
+}
+});

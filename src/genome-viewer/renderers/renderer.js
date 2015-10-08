@@ -22,7 +22,6 @@
 //Parent class for all renderers
 function Renderer(args) {
 
-
 };
 
 Renderer.prototype = {
@@ -40,6 +39,7 @@ Renderer.prototype = {
     getDefaultConfig: function (type) {
         return FEATURE_TYPES[type];
     },
+
     getLabelWidth: function (label, args) {
         /* insert in dom to get the label width and then remove it*/
         var svgLabel = SVG.create("text", {

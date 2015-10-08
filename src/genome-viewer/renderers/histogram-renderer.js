@@ -19,10 +19,11 @@
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-HistogramRenderer.prototype = new Renderer({});
+HistogramRenderer.prototype = new Renderer();
 
 function HistogramRenderer(args) {
     Renderer.call(this, args);
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
@@ -43,11 +44,12 @@ function HistogramRenderer(args) {
 
     //set instantiation args
     _.extend(this, args);
-
 };
 
 
-HistogramRenderer.prototype.render = function (features, args) {
+_.extend(HistogramRenderer.prototype, {
+
+render: function (features, args) {
     var middle = args.width / 2;
     var points = '';
     if (features.length > 0) {//Force first point at this.histogramHeight
@@ -97,4 +99,5 @@ HistogramRenderer.prototype.render = function (features, args) {
         "fill": '#9493b1',
         "cursor": "pointer"
     });
-};
+}
+});

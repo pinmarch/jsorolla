@@ -20,31 +20,32 @@
  */
 
 //any item with chromosome start end
-GeneRenderer.prototype = new Renderer({});
+GeneRenderer.prototype = new Renderer();
 
 function GeneRenderer(args) {
     Renderer.call(this, args);
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
     this.fontClass = 'ocb-font-sourcesanspro ocb-font-size-12';
     this.toolTipfontClass = 'ocb-font-default';
 
-    if (_.isObject(args)) {
-        _.extend(this, args);
-    }
+    _.extend(this, args);
 
     this.on(this.handlers);
 };
 
-GeneRenderer.prototype.setFeatureConfig = function (configObject) {
-    _.extend(this, configObject);
-};
+_.extend(GeneRenderer.prototype, {
 
-GeneRenderer.prototype.render = function (features, args) {
+setFeatureConfig: function (configObject) {
+    _.extend(this, configObject);
+},
+
+render: function (features, args) {
     var _this = this;
+
     var draw = function (feature) {
-        //get feature render configuration
 
         //get feature render configuration
         _this.setFeatureConfig(FEATURE_TYPES.gene);
@@ -136,7 +137,6 @@ GeneRenderer.prototype.render = function (features, args) {
 
                 $(featureGroup).qtip({
                     content: {text: tooltipText, title: tooltipTitle},
-//                    position: {target: "mouse", adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
                     position: {target: "mouse", adjust: {x: 25, y: 15}},
                     style: { width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'}
                 });
@@ -168,7 +168,7 @@ GeneRenderer.prototype.render = function (features, args) {
                         var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(transcript) : _this.infoWidgetId;
 
                         //se resta el trozo del final del gen hasta el principio del transcrito y se le suma el texto del transcrito
-//                        var svgLabelWidth = _this.getLabelWidth(label, args);
+                        // var svgLabelWidth = _this.getLabelWidth(label, args);
                         var svgLabelWidth = label.length * 6.4;
                         var maxWidth = Math.max(width, width - ((feature.end - transcript.start) * ( args.pixelBase)) + svgLabelWidth);
 
@@ -204,7 +204,6 @@ GeneRenderer.prototype.render = function (features, args) {
 
                         $(transcriptGroup).qtip({
                             content: {text: tooltipText, title: tooltipTitle},
-//                            position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
                             position: {target: "mouse", adjust: {x: 25, y: 15}},
                             style: { width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'}
                         });
@@ -236,7 +235,6 @@ GeneRenderer.prototype.render = function (features, args) {
 
                             $(exonGroup).qtip({
                                 content: {text: tooltipText, title: tooltipTitle},
-//                                position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
                                 position: {target: "mouse", adjust: {x: 25, y: 15}},
                                 style: { width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'}
                             });
@@ -321,4 +319,5 @@ GeneRenderer.prototype.render = function (features, args) {
     for (var i = 0, leni = features.length; i < leni; i++) {
         draw(features[i]);
     }
-};
+}
+});

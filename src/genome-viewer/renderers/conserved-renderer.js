@@ -19,21 +19,23 @@
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-ConservedRenderer.prototype = new Renderer({});
+ConservedRenderer.prototype = new Renderer();
 
 function ConservedRenderer(args){
     Renderer.call(this,args);
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
     //set default args
     //set instantiation args
     _.extend(this, args);
-
 };
 
 
-ConservedRenderer.prototype.render = function(features, args) {
+_.extend(ConservedRenderer.prototype, {
+
+render: function(features, args) {
     var middle = args.width/2;
     var multiplier = 20;
     var histogramHeight = 75;
@@ -66,6 +68,5 @@ ConservedRenderer.prototype.render = function(features, args) {
         "fill": 'salmon',
         "cursor": "pointer"
     });
-
-
-};
+}
+});

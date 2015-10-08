@@ -20,26 +20,28 @@
  */
 
 //any item with chromosome start end
-VcfMultisampleRenderer.prototype = new Renderer({});
+VcfMultisampleRenderer.prototype = new Renderer();
 
 function VcfMultisampleRenderer(args) {
     Renderer.call(this, args);
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
     this.fontClass = 'ocb-font-sourcesanspro ocb-font-size-12';
     this.toolTipfontClass = 'ocb-font-default';
 
-    if (_.isObject(args)) {
-        _.extend(this, args);
-    }
+    _.extend(this, args);
 
     this.on(this.handlers);
 };
 
 
-VcfMultisampleRenderer.prototype.render = function (features, args) {
+_.extend(VcfMultisampleRenderer.prototype, {
+
+render: function (features, args) {
     var _this = this;
+
     var draw = function (feature) {
         //get feature render configuration
         var color = _.isFunction(_this.color) ? _this.color(feature) : _this.color;
@@ -79,10 +81,10 @@ VcfMultisampleRenderer.prototype.render = function (features, args) {
         var rowHeight = textHeight + height + 2;
 
 
-//        azul osucuro: 0/0
-//        negro: ./.
-//        rojo: 1/1
-//        naranja 0/1
+        // azul osucuro: 0/0
+        // negro: ./.
+        // rojo: 1/1
+        // naranja 0/1
 
         var d00 = '';
         var dDD = '';
@@ -165,7 +167,6 @@ VcfMultisampleRenderer.prototype.render = function (features, args) {
         var lastSampleIndex = 0;
         $(featureGroup).qtip({
             content: {text: tooltipText + '<br>' + feature.samples[lastSampleIndex], title: tooltipTitle},
-//                        position: {target: "mouse", adjust: {x: 15, y: 0}, effect: false},
             position: {target: "mouse", adjust: {x: 25, y: 15}},
             style: { width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'}
         });
@@ -184,4 +185,5 @@ VcfMultisampleRenderer.prototype.render = function (features, args) {
         var feature = features[i];
         draw(feature);
     }
-};
+}
+});

@@ -19,10 +19,11 @@
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-FeatureClusterRenderer.prototype = new Renderer({});
+FeatureClusterRenderer.prototype = new Renderer();
 
 function FeatureClusterRenderer(args) {
     Renderer.call(this, args);
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
@@ -35,12 +36,14 @@ function FeatureClusterRenderer(args) {
 
     //set instantiation args
     _.extend(this, args);
-
 };
 
 
-FeatureClusterRenderer.prototype.render = function (features, args) {
+_.extend(FeatureClusterRenderer.prototype, {
+
+render: function (features, args) {
     var _this = this;
+
     var middle = args.width / 2;
     var maxValue = 0;
 
@@ -55,7 +58,7 @@ FeatureClusterRenderer.prototype.render = function (features, args) {
         var x = _this.getFeatureX(feature, args);
 
         if (feature.features_count == null) {
-//            var height = Math.log(features[i].absolute);
+            // var height = Math.log(features[i].absolute);
             if (feature.absolute != 0) {
                 feature.features_count = Math.log(features[i].absolute);
             } else {
@@ -93,9 +96,9 @@ FeatureClusterRenderer.prototype.render = function (features, args) {
                 limit: 20
             },
             async: false
-//            success:function(data){
-//                str+=data.response[0].result.length+' cb';
-//            }
+            // success:function(data){
+            //     str+=data.response[0].result.length+' cb';
+            // }
         });
 
         $(rect).qtip({
@@ -132,4 +135,5 @@ FeatureClusterRenderer.prototype.render = function (features, args) {
     for (var i = 0, len = features.length; i < len; i++) {
         drawFeature(features[i].value);
     }
-};
+}
+});

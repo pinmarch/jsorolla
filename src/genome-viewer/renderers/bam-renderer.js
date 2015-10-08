@@ -20,25 +20,26 @@
  */
 
 //any item with chromosome start end
-BamRenderer.prototype = new Renderer({});
+BamRenderer.prototype = new Renderer();
 
 function BamRenderer(args) {
     Renderer.call(this, args);
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
     this.fontClass = 'ocb-font-sourcesanspro ocb-font-size-12';
     this.toolTipfontClass = 'ocb-font-default';
 
-    if (_.isObject(args)) {
-        _.extend(this, args);
-    }
+    _.extend(this, args);
 
     this.on(this.handlers);
 };
 
 
-BamRenderer.prototype.render = function (response, args) {
+_.extend(BamRenderer.prototype, {
+
+render: function (response, args) {
     var _this = this;
 
 
@@ -72,7 +73,7 @@ BamRenderer.prototype.render = function (response, args) {
 
     var chunkList = response.items;
 
-//    var middle = this.width / 2;
+    // var middle = this.width / 2;
 
     var bamCoverGroup = SVG.addChild(args.svgCanvasFeatures, "g", {
         "class": "bamCoverage",
@@ -326,8 +327,14 @@ BamRenderer.prototype.render = function (response, args) {
                 var readEls = [];
                 var mateEls = [];
                 var readPoints = {
-                    "Reverse": readX + "," + (rowY + (readSettings.height / 2)) + " " + (readX + 5) + "," + rowY + " " + (readX + readWidth - 5) + "," + rowY + " " + (readX + readWidth - 5) + "," + (rowY + readSettings.height) + " " + (readX + 5) + "," + (rowY + readSettings.height),
-                    "Forward": readX + "," + rowY + " " + (readX + readWidth - 5) + "," + rowY + " " + (readX + readWidth) + "," + (rowY + (readSettings.height / 2)) + " " + (readX + readWidth - 5) + "," + (rowY + readSettings.height) + " " + readX + "," + (rowY + readSettings.height)
+                    "Reverse": readX + "," + (rowY + (readSettings.height / 2)) + " " +
+                               (readX + 5) + "," + rowY + " " + (readX + readWidth - 5) + "," + rowY + " " +
+                               (readX + readWidth - 5) + "," + (rowY + readSettings.height) + " " +
+                               (readX + 5) + "," + (rowY + readSettings.height),
+                    "Forward": readX + "," + rowY + " " + (readX + readWidth - 5) + "," + rowY + " " +
+                               (readX + readWidth) + "," + (rowY + (readSettings.height / 2)) + " " +
+                               (readX + readWidth - 5) + "," + (rowY + readSettings.height) + " " +
+                               readX + "," + (rowY + readSettings.height)
                 }
                 var readPoly = SVG.addChild(bamReadGroup, "polygon", {
                     "points": readPoints[readStrand],
@@ -338,8 +345,14 @@ BamRenderer.prototype.render = function (response, args) {
                 });
                 readEls.push(readPoly);
                 var matePoints = {
-                    "Reverse": mateX + "," + (rowY + (mateSettings.height / 2)) + " " + (mateX + 5) + "," + rowY + " " + (mateX + mateWidth - 5) + "," + rowY + " " + (mateX + mateWidth - 5) + "," + (rowY + mateSettings.height) + " " + (mateX + 5) + "," + (rowY + mateSettings.height),
-                    "Forward": mateX + "," + rowY + " " + (mateX + mateWidth - 5) + "," + rowY + " " + (mateX + mateWidth) + "," + (rowY + (mateSettings.height / 2)) + " " + (mateX + mateWidth - 5) + "," + (rowY + mateSettings.height) + " " + mateX + "," + (rowY + mateSettings.height)
+                    "Reverse": mateX + "," + (rowY + (mateSettings.height / 2)) + " " +
+                               (mateX + 5) + "," + rowY + " " + (mateX + mateWidth - 5) + "," + rowY + " " +
+                               (mateX + mateWidth - 5) + "," + (rowY + mateSettings.height) + " " +
+                               (mateX + 5) + "," + (rowY + mateSettings.height),
+                    "Forward": mateX + "," + rowY + " " + (mateX + mateWidth - 5) + "," + rowY + " " +
+                               (mateX + mateWidth) + "," + (rowY + (mateSettings.height / 2)) + " " +
+                               (mateX + mateWidth - 5) + "," + (rowY + mateSettings.height) + " " +
+                               mateX + "," + (rowY + mateSettings.height)
                 }
                 var matePoly = SVG.addChild(bamReadGroup, "polygon", {
                     "points": matePoints[matestrand],
@@ -387,7 +400,8 @@ BamRenderer.prototype.render = function (response, args) {
                 });
                 $(readEls).click(function (event) {
                     console.log(read);
-                    _this.showInfoWidget({query: read[readSettings.infoWidgetId], feature: read, featureType: read.featureType, adapter: _this.trackData.adapter});
+                    _this.showInfoWidget({ query: read[readSettings.infoWidgetId], feature: read,
+                                           featureType: read.featureType, adapter: _this.trackData.adapter });
                 });
                 $(mateEls).qtip({
                     content: {text: mateSettings.getTipText(mate), title: mateSettings.getTipTitle(mate)},
@@ -398,7 +412,8 @@ BamRenderer.prototype.render = function (response, args) {
                 });
                 $(mateEls).click(function (event) {
                     console.log(mate);
-                    _this.showInfoWidget({query: mate[mateSettings.infoWidgetId], feature: mate, featureType: mate.featureType, adapter: _this.trackData.adapter});
+                    _this.showInfoWidget({ query: mate[mateSettings.infoWidgetId], feature: mate,
+                                           featureType: mate.featureType, adapter: _this.trackData.adapter });
                 });
                 break;
             }
@@ -435,4 +450,5 @@ BamRenderer.prototype.render = function (response, args) {
         }
     }
     console.timeEnd("BamRender " + response.params.resource);
-};
+}
+});
