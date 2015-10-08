@@ -144,7 +144,7 @@ render: function (features, args) {
     /****/
     var timeId = "write dom " + Utils.randomString(4);
     console.time(timeId);
-    console.log(features.length);
+    // console.log(features.length);
     /****/
 
 

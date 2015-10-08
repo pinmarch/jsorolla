@@ -243,6 +243,10 @@ Track.prototype = {
         $(titleBtn).click(function (e) {
             _this.toggleContent();
         });
+        $(configBtn).click(function (e) {
+            e.sender = _this;
+            _this.trigger('trackconfig:click', e);
+        });
 
         /** svg div **/
         $(svgdiv).css({'height': this.height});
