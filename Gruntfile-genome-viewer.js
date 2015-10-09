@@ -31,6 +31,10 @@ module.exports = function (grunt) {
 
                 ],
                 dest: '<%= def.build %>/<%= def.name %>.js'
+            },
+            cssdist: {
+                src: ['styles/**/*.css'],
+                dest: '<%= def.build %>/styles/css/<%= def.name %>.css'
             }
         },
         uglify: {
@@ -46,9 +50,18 @@ module.exports = function (grunt) {
         copy: {
             dist: {
                 files: [
-                    {   expand: true, cwd: './', src: ['vendor/**'], dest: '<%= def.build %>/' },
-                    {   expand: true, cwd: './', src: ['styles/**'], dest: '<%= def.build %>/' }, // includes files in path and its subdirs
-                    {   expand: true, cwd: './src/<%= def.name %>/', src: ['gv-config.js'], dest: '<%= def.build %>/' }
+                    {   expand: true, cwd: './',
+                        src: ['vendor/**', '!vendor/core/**'],
+                        dest: '<%= def.build %>/'
+                    },
+                    {   expand: true, cwd: './',
+                        src: ['styles/fonts/**', 'styles/img/**'],
+                        dest: '<%= def.build %>/'
+                    },
+                    {   expand: true, cwd: './src/<%= def.name %>/',
+                        src: ['gv-config.js'],
+                        dest: '<%= def.build %>/'
+                    }
                 ]
             }
         },
@@ -70,7 +83,7 @@ module.exports = function (grunt) {
                             '<%= def.build %>/vendor/bootstrap-*-dist/css/bootstrap.min.css',
                             '<%= def.build %>/vendor/typeahead.js-bootstrap.css'
                         ],
-                        'css': ['<%= def.build %>/styles/css/style.css']
+                        'css': ['<%= def.build %>/styles/css/<%= def.name %>.css']
                     },
                     scripts: {
                         'vendor': [
