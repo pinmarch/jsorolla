@@ -19,7 +19,7 @@
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-SequenceTrack.prototype = new Track({});
+SequenceTrack.prototype = new Track();
 
 function SequenceTrack(args) {
 
@@ -28,11 +28,12 @@ function SequenceTrack(args) {
 
     //set default args
     args.resizable = false;
+
     Track.call(this, args);
 };
 
-
-SequenceTrack.prototype.getMetricsInfo = function() {
+_.extend(SequenceTrack.prototype, {
+getMetricsInfo: function () {
 
     this.svgCanvasOffset = Math.floor(this.width * 1.5 / this.pixelBase);
     this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset;
@@ -54,9 +55,9 @@ SequenceTrack.prototype.getMetricsInfo = function() {
         width: this.width,
         pixelPosition: this.pixelPosition
     };
-};
+},
 
-SequenceTrack.prototype.render = function (targetId) {
+render: function (targetId) {
     var _this = this;
 
     this.initializeDom(targetId);
@@ -65,18 +66,18 @@ SequenceTrack.prototype.render = function (targetId) {
         _this.renderer.render(event, _this.getMetricsInfo());
         _this.setLoading(false);
     });
-};
+},
 
-SequenceTrack.prototype.resetSvg = function() {
+resetSvg: function () {
     this.getMetricsInfo();
 
     this.cleanSvg();
     this.svgCanvasFrame.removeAttribute("transform");
     this.initialCenter = this.region.center();
     this.renderer.renderedPosition = {};
-};
+},
 
-SequenceTrack.prototype.draw = function () {
+draw: function () {
     var _this = this;
 
     this.resetSvg();
@@ -96,10 +97,10 @@ SequenceTrack.prototype.draw = function () {
     } else {
         this.invalidZoomText.setAttribute("visibility", "visible");
     }
-};
+},
 
 
-SequenceTrack.prototype.move = function (disp) {
+move: function (disp) {
     var _this = this;
 
     this.svgCanvasFrame.setAttribute("transform",
@@ -138,4 +139,5 @@ SequenceTrack.prototype.move = function (disp) {
             this.svgCanvasRightLimit = newRight;
         }
     }
-};
+}
+});

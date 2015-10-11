@@ -19,30 +19,32 @@
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-BamTrack.prototype = new Track({});
+BamTrack.prototype = new Track();
 
 function BamTrack(args) {
-    Track.call(this,args);
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
     //set default args
 
+    //set instantiation args, must be last
+    _.extend(this, args);
+
     //save default render reference;
     this.defaultRenderer = this.renderer;
     this.histogramRenderer = new HistogramRenderer();
 
-
+    this.dataType = 'features';
     this.chunksDisplayed = {};
 
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.dataType = 'features';
+    Track.call(this, args);
 };
 
-BamTrack.prototype.render = function(targetId){
+_.extend(BamTrack.prototype, {
+render: function (targetId) {
     var _this = this;
+
     this.initializeDom(targetId);
 
     this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
@@ -74,15 +76,14 @@ BamTrack.prototype.render = function(targetId){
         _this.updateHeight();
         _this.setLoading(false);
     });
+},
 
-};
-
-BamTrack.prototype.draw = function(){
+draw: function () {
     var _this = this;
 
     this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
-    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset*2;
-    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset*2
+    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
+    this.svgCanvasRightLimit = this.region.end + this.svgCanvasOffset * 2
 
     this.updateHistogramParams();
     this.cleanSvg();
@@ -92,14 +93,16 @@ BamTrack.prototype.draw = function(){
         this.dataType = 'histogram';
     }
 
-    if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
+    if (typeof this.visibleRegionSize === 'undefined' ||
+        this.region.length() < this.visibleRegionSize) {
+
         this.setLoading(true);
         this.dataAdapter.getData({
             dataType: this.dataType,
             region: new Region({
                 chromosome: this.region.chromosome,
-                start: this.region.start - this.svgCanvasOffset * 2,
-                end: this.region.end + this.svgCanvasOffset * 2
+                start: this.svgCanvasLeftLimit,
+                end: this.svgCanvasRightLimit
             }),
             params: {
                 histogram: this.histogram,
@@ -114,10 +117,10 @@ BamTrack.prototype.draw = function(){
         this.invalidZoomText.setAttribute("visibility", "visible");
     }
     _this.updateHeight();
-};
+},
 
 
-BamTrack.prototype.move = function(disp){
+move: function (disp) {
     var _this = this;
 
     this.dataType = 'features';
@@ -136,14 +139,16 @@ BamTrack.prototype.move = function(disp){
     var virtualStart = parseInt(this.region.start - this.svgCanvasOffset);
     var virtualEnd = parseInt(this.region.end + this.svgCanvasOffset);
 
-    if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
+    if (typeof this.visibleRegionSize === 'undefined' ||
+        this.region.length() < this.visibleRegionSize) {
 
         if(disp>0 && virtualStart < this.svgCanvasLeftLimit){
+            var newLeft = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
             this.dataAdapter.getData({
                 dataType: this.dataType,
                 region: new Region({
                     chromosome: _this.region.chromosome,
-                    start: parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset),
+                    start: newLeft,
                     end: this.svgCanvasLeftLimit
                 }),
                 params: {
@@ -153,16 +158,17 @@ BamTrack.prototype.move = function(disp){
                     interval: this.interval
                 }
             });
-            this.svgCanvasLeftLimit = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
+            this.svgCanvasLeftLimit = newLeft;
         }
 
         if(disp<0 && virtualEnd > this.svgCanvasRightLimit){
+            var newRight = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset);
             this.dataAdapter.getData({
                 dataType: this.dataType,
                 region: new Region({
                     chromosome: _this.region.chromosome,
                     start: this.svgCanvasRightLimit,
-                    end: parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset)
+                    end: newRight
                 }),
                 params: {
                     histogram: this.histogram,
@@ -171,14 +177,12 @@ BamTrack.prototype.move = function(disp){
                     interval: this.interval
                 }
             });
-            this.svgCanvasRightLimit = parseInt(this.svgCanvasRightLimit+this.svgCanvasOffset);
+            this.svgCanvasRightLimit = newRight;
         }
-
     }
+},
 
-};
-
-BamTrack.prototype._removeDisplayedChunks = function(response){
+_removeDisplayedChunks: function (response) {
     //Returns an array avoiding already drawn features in this.chunksDisplayed
     var chunks = response.items;
     var dataType = response.dataType;
@@ -216,4 +220,5 @@ BamTrack.prototype._removeDisplayedChunks = function(response){
     }
     response.items = newChunks;
     return response;
-};
+}
+});

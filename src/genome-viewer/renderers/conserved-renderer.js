@@ -23,13 +23,6 @@ ConservedRenderer.prototype = new Renderer();
 
 function ConservedRenderer(args){
     Renderer.call(this,args);
-
-    // Using Underscore 'extend' function to extend and add Backbone Events
-    _.extend(this, Backbone.Events);
-
-    //set default args
-    //set instantiation args
-    _.extend(this, args);
 };
 
 

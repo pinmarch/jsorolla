@@ -22,17 +22,9 @@
 SequenceRenderer.prototype = new Renderer();
 
 function SequenceRenderer(args){
-
-    // Using Underscore 'extend' function to extend and add Backbone Events
-    _.extend(this, Backbone.Events);
-
-    this.fontClass = 'ocb-font-ubuntumono ocb-font-size-16';
-    this.toolTipfontClass = 'ocb-font-default';
+    Renderer.call(this, args);
 
     this.renderedPosition = {};
-
-    _.extend(this, args);
-    Renderer.call(this, args);
 };
 
 

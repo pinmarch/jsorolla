@@ -23,10 +23,11 @@ HistogramRenderer.prototype = new Renderer();
 
 function HistogramRenderer(args) {
     Renderer.call(this, args);
+};
 
-    // Using Underscore 'extend' function to extend and add Backbone Events
-    _.extend(this, Backbone.Events);
 
+_.extend(HistogramRenderer.prototype, {
+initialize: function (args) {
     //set default args
     this.histogramHeight = 75;
 
@@ -39,15 +40,8 @@ function HistogramRenderer(args) {
             this.maxValue = args.histogramMaxFreqValue;
         }
     }
-    //this.multiplier = 7;
     this.multiplier = this.histogramHeight / this.maxValue;
-
-    //set instantiation args
-    _.extend(this, args);
-};
-
-
-_.extend(HistogramRenderer.prototype, {
+},
 
 render: function (features, args) {
     var middle = args.width / 2;

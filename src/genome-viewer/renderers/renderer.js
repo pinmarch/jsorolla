@@ -22,17 +22,33 @@
 //Parent class for all renderers
 function Renderer(args) {
 
+    // Using Underscore 'extend' function to extend and add Backbone Events
+    _.extend(this, Backbone.Events);
+
+    this.fontClass = 'ocb-font-ubuntumono ocb-font-size-16';
+    this.toolTipfontClass = 'ocb-font-default';
+
+    if (_.isFunction(this.prototype.initialize)) {
+        this.prototype.initialize.apply(this, args);
+    }
+
+    _.extend(this, args);
+
+    this.on(this.handlers);
 };
 
 Renderer.prototype = {
 
-    render: function (items) {
-
+    initialize: function (args) {
     },
 
-    getFeatureX: function (feature, args) {//returns svg feature x value from feature genomic position
-        var middle = args.width / 2;
-        var x = args.pixelPosition + middle - ((args.position - feature.start) * args.pixelBase);
+    render: function (items) {
+    },
+
+    getFeatureX: function (feature, metrics) {
+        //returns svg feature x value from feature genomic position
+        var middle = metrics.width / 2;
+        var x = metrics.pixelPosition + middle - ((metrics.position - feature.start) * metrics.pixelBase);
         return x;
     },
 
@@ -44,7 +60,7 @@ Renderer.prototype = {
         /* insert in dom to get the label width and then remove it*/
         var svgLabel = SVG.create("text", {
             'font-weight': 400,
-            'class':this.fontClass
+            'class': this.fontClass
         });
         svgLabel.textContent = label;
         $(args.svgCanvasFeatures).append(svgLabel);

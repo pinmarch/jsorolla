@@ -24,19 +24,12 @@ GeneRenderer.prototype = new Renderer();
 
 function GeneRenderer(args) {
     Renderer.call(this, args);
-
-    // Using Underscore 'extend' function to extend and add Backbone Events
-    _.extend(this, Backbone.Events);
-
-    this.fontClass = 'ocb-font-sourcesanspro ocb-font-size-12';
-    this.toolTipfontClass = 'ocb-font-default';
-
-    _.extend(this, args);
-
-    this.on(this.handlers);
 };
 
 _.extend(GeneRenderer.prototype, {
+initialize: function (args) {
+    this.fontClass = 'ocb-font-sourcesanspro ocb-font-size-12';
+},
 
 setFeatureConfig: function (configObject) {
     _.extend(this, configObject);

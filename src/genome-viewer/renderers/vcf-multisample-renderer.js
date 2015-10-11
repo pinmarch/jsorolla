@@ -24,20 +24,13 @@ VcfMultisampleRenderer.prototype = new Renderer();
 
 function VcfMultisampleRenderer(args) {
     Renderer.call(this, args);
-
-    // Using Underscore 'extend' function to extend and add Backbone Events
-    _.extend(this, Backbone.Events);
-
-    this.fontClass = 'ocb-font-sourcesanspro ocb-font-size-12';
-    this.toolTipfontClass = 'ocb-font-default';
-
-    _.extend(this, args);
-
-    this.on(this.handlers);
 };
 
 
 _.extend(VcfMultisampleRenderer.prototype, {
+initialize: function (args) {
+    this.fontClass = 'ocb-font-sourcesanspro ocb-font-size-12';
+},
 
 render: function (features, args) {
     var _this = this;

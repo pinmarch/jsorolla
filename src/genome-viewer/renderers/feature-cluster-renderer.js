@@ -23,23 +23,17 @@ FeatureClusterRenderer.prototype = new Renderer();
 
 function FeatureClusterRenderer(args) {
     Renderer.call(this, args);
+};
 
-    // Using Underscore 'extend' function to extend and add Backbone Events
-    _.extend(this, Backbone.Events);
 
+_.extend(FeatureClusterRenderer.prototype, {
+initialize: function (args) {
     //set default args
     this.histogramHeight = 75;
     this.multiplier = 7;
 
     this.fontClass = 'ocb-font-sourcesanspro ocb-font-size-12';
-    this.toolTipfontClass = 'ocb-font-default';
-
-    //set instantiation args
-    _.extend(this, args);
-};
-
-
-_.extend(FeatureClusterRenderer.prototype, {
+},
 
 render: function (features, args) {
     var _this = this;

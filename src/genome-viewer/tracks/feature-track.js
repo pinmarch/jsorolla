@@ -19,6 +19,8 @@
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
+FeatureTrack.prototype = new Track();
+
 function FeatureTrack(args) {
 
     // Using Underscore 'extend' function to extend and add Backbone Events
@@ -41,8 +43,6 @@ function FeatureTrack(args) {
 
     Track.call(this, args);
 };
-
-FeatureTrack.prototype = new Track();
 
 _.extend(FeatureTrack.prototype, {
     render: function (targetId) {
