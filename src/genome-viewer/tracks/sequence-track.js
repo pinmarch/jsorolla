@@ -22,17 +22,15 @@
 SequenceTrack.prototype = new Track();
 
 function SequenceTrack(args) {
-
-    // Using Underscore 'extend' function to extend and add Backbone Events
-    _.extend(this, Backbone.Events);
-
-    //set default args
-    args.resizable = false;
-
     Track.call(this, args);
 };
 
 _.extend(SequenceTrack.prototype, {
+initialize: function (args) {
+    //set default args
+    this.resizable = false;
+},
+
 getMetricsInfo: function () {
 
     this.svgCanvasOffset = Math.floor(this.width * 1.5 / this.pixelBase);

@@ -41,7 +41,6 @@ function Track(args) {
 
     _.extend(this, args);
 
-
     this.pixelBase;
     this.svgCanvasWidth = 500000;//mesa
     this.pixelPosition = this.svgCanvasWidth / 2;
@@ -56,11 +55,18 @@ function Track(args) {
     this.svgCanvasLeftLimit;
     this.svgCanvasRightLimit;
 
-
     this.invalidZoomText;
 
     this.renderedArea = {};//used for renders to store binary trees
     this.chunksDisplayed = {};//used to avoid painting multiple times features contained in more than 1 chunk
+
+    //save default render reference;
+    this.defaultRenderer = this.renderer;
+    this.histogramRenderer = new HistogramRenderer(args);
+
+    if (_.isFunction(this.prototype.initialize)) {
+        this.prototype.initialize.apply(this, args);
+    }
 
     this.on(this.handlers);
 
@@ -71,6 +77,9 @@ function Track(args) {
 };
 
 Track.prototype = {
+    initialize: function (args) {
+    },
+
     get: function (attr) {
         return this[attr];
     },

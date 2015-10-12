@@ -22,26 +22,15 @@
 BamTrack.prototype = new Track();
 
 function BamTrack(args) {
-
-    // Using Underscore 'extend' function to extend and add Backbone Events
-    _.extend(this, Backbone.Events);
-
-    //set default args
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    //save default render reference;
-    this.defaultRenderer = this.renderer;
-    this.histogramRenderer = new HistogramRenderer();
-
-    this.dataType = 'features';
-    this.chunksDisplayed = {};
-
     Track.call(this, args);
 };
 
 _.extend(BamTrack.prototype, {
+initialize: function (args) {
+        this.dataType = 'features';
+        this.chunksDisplayed = {};
+},
+
 render: function (targetId) {
     var _this = this;
 

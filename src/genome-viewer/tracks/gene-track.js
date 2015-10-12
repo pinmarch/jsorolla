@@ -20,27 +20,18 @@
  */
 
 function GeneTrack(args) {
-
-    // Using Underscore 'extend' function to extend and add Backbone Events
-    _.extend(this, Backbone.Events);
-
-    //set default args
-    this.minTranscriptRegionSize;
-    this.exclude;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    //save default render reference;
-    this.defaultRenderer = this.renderer;
-    this.histogramRenderer = new HistogramRenderer(args);
-
     Track.call(this, args);
 };
 
 GeneTrack.prototype = new Track();
 
 _.extend(GeneTrack.prototype, {
+    initialize: function (args) {
+        //set default args
+        this.minTranscriptRegionSize;
+        this.exclude;
+    },
+
     render: function (targetId) {
         var _this = this;
 

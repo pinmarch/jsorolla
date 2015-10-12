@@ -22,29 +22,19 @@
 FeatureTrack.prototype = new Track();
 
 function FeatureTrack(args) {
-
-    // Using Underscore 'extend' function to extend and add Backbone Events
-    _.extend(this, Backbone.Events);
-
-    //set default args
-    this.featureType = 'Feature';
-    this.dataType = 'features';
-    this.dataAdapter = {};
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    //save default render reference;
-    this.defaultRenderer = this.renderer;
-    this.histogramRenderer = new HistogramRenderer(args);
-
-    this.resource = this.dataAdapter.resource;
-    this.species = this.dataAdapter.species;
-
     Track.call(this, args);
 };
 
 _.extend(FeatureTrack.prototype, {
+    initialize: function (args) {
+        //set default args
+        this.featureType = 'Feature';
+        this.dataType = 'features';
+
+        this.resource = this.dataAdapter.resource;
+        this.species = this.dataAdapter.species;
+    },
+
     render: function (targetId) {
         var _this = this;
 
