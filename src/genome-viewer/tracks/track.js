@@ -64,8 +64,8 @@ function Track(args) {
     this.defaultRenderer = this.renderer;
     this.histogramRenderer = new HistogramRenderer(args);
 
-    if (_.isFunction(this.prototype.initialize)) {
-        this.prototype.initialize.apply(this, args);
+    if (_.isFunction(this.initialize)) {
+        this.initialize.apply(this, args);
     }
 
     this.on(this.handlers);

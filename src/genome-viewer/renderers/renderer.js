@@ -28,11 +28,11 @@ function Renderer(args) {
     this.fontClass = 'ocb-font-ubuntumono ocb-font-size-16';
     this.toolTipfontClass = 'ocb-font-default';
 
-    if (_.isFunction(this.prototype.initialize)) {
-        this.prototype.initialize.apply(this, args);
-    }
-
     _.extend(this, args);
+
+    if (_.isFunction(this.initialize)) {
+        this.initialize.apply(this, args);
+    }
 
     this.on(this.handlers);
 };
