@@ -203,7 +203,7 @@ KaryotypePanel.prototype = {
             resource: 'all',
             async:false,
             success: function (data) {
-                _this.chromosomeList = data.response.result.chromosomes;
+                _this.chromosomeList = data.response[0].result[0].chromosomes;
                 _this.chromosomeList.sort(sortfunction);
                 _this._drawSvg(_this.chromosomeList);
             }

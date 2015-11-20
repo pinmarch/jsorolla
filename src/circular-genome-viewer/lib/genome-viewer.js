@@ -4238,7 +4238,7 @@ ChromosomePanel.prototype = {
             query: this.region.chromosome,
             resource: 'info',
             success: function (data) {
-                _this.data = data.response[0].result.chromosomes;
+                _this.data = data.response[0].result[0].chromosomes;
                 _this.data.cytobands.sort(function (a, b) {
                     return (a.start - b.start);
                 });
@@ -4770,7 +4770,7 @@ KaryotypePanel.prototype = {
             subCategory: 'chromosome',
             resource: 'all',
             success: function (data) {
-                _this.chromosomeList = data.response.result.chromosomes;
+                _this.chromosomeList = data.response[0].result[0].chromosomes;
                 _this.chromosomeList.sort(sortfunction);
                 _this._drawSvg(_this.chromosomeList);
             }
@@ -11789,7 +11789,7 @@ GenomeViewer.prototype = {
             resource: 'all',
             async: false,
             success: function (data) {
-                var chromosomeList = data.response.result.chromosomes;
+                var chromosomeList = data.response[0].result[0].chromosomes;
                 for (var i = 0; i < chromosomeList.length; i++) {
                     var chromosome = chromosomeList[i];
                     chromosomes[chromosome.name] = chromosome;
