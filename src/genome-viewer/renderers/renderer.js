@@ -31,7 +31,7 @@ function Renderer(args) {
     _.extend(this, args);
 
     if (_.isFunction(this.initialize)) {
-        this.initialize.apply(this, args);
+        this.initialize.call(this, args);
     }
 
     this.on(this.handlers);

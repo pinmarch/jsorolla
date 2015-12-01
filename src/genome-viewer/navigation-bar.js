@@ -141,7 +141,7 @@ NavigationBar.prototype = {
             '       <datalist id="searchDataList">' +
             '       </datalist>' +
             '       <div class="input-group-btn">' +
-            '           <button id="goButton" class="btn btn-default btn-sm custom-xs" type="button"><span class="glyphicon glyphicon-search"></span></button>' +
+            '           <button id="quickSearchButton" class="btn btn-default btn-sm custom-xs" type="button"><span class="glyphicon glyphicon-search"></span></button>' +
             '       </div>' +
             '   </div>' +
             '   </div>' +

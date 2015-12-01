@@ -90,18 +90,18 @@ OpencgaAdapter.prototype = {
                             _this._opencgaSuccess(data, dataType);
                         }
                     });
-//                    CellBaseManager.get({
-//                        host: this.host,
-//                        species: this.species,
-//                        category: this.category,
-//                        subCategory: this.subCategory,
-//                        query: queriesList[i],
-//                        resource: this.resource,
-//                        params: params,
-//                        success: function (data) {
-//                            _this._cellbaseSuccess(data, dataType);
-//                        }
-//                    });
+                   // CellBaseManager.get({
+                   //     host: this.host,
+                   //     species: this.species,
+                   //     category: this.category,
+                   //     subCategory: this.subCategory,
+                   //     query: queriesList[i],
+                   //     resource: this.resource,
+                   //     params: params,
+                   //     success: function (data) {
+                   //         _this._cellbaseSuccess(data, dataType);
+                   //     }
+                   // });
                 }
             }
             if (chunksByRegion.cached.length > 0) {

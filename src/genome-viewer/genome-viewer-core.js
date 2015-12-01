@@ -762,7 +762,8 @@ GenomeViewer.prototype = {
     },
     _checkRegion: function (newRegion) {
         var newChr = this.chromosomes[newRegion.chromosome];
-        if (newRegion.chromosome !== this.region.chromosome) {
+        if (newRegion.chromosome !== this.region.chromosome &&
+            newRegion.end > newChr.size || newRegion.start < 1) {
             newRegion.start = Math.round(newChr.size / 2);
             newRegion.end = Math.round(newChr.size / 2);
         }

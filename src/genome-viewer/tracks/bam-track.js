@@ -27,8 +27,8 @@ function BamTrack(args) {
 
 _.extend(BamTrack.prototype, {
     initialize: function (args) {
-            this.dataType = 'features';
-            this.chunksDisplayed = {};
+        this.dataType = 'features';
+        this.chunksDisplayed = {};
     },
 
     render: function (targetId) {
@@ -40,7 +40,7 @@ _.extend(BamTrack.prototype, {
         this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset*2;
         this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset*2
 
-        this.dataAdapter.on('data:ready',function(event){
+        this.dataAdapter.on('data:ready',function(event) {
             var features;
             if (event.dataType == 'histogram') {
                 _this.renderer = _this.histogramRenderer;
@@ -51,8 +51,8 @@ _.extend(BamTrack.prototype, {
             }
             _this.renderer.render(features, {
                 svgCanvasFeatures : _this.svgCanvasFeatures,
-                featureTypes:_this.featureTypes,
-                renderedArea:_this.renderedArea,
+                featureTypes: _this.featureTypes,
+                renderedArea: _this.renderedArea,
                 pixelBase : _this.pixelBase,
                 position : _this.region.center(),
                 region : _this.region,
@@ -119,7 +119,7 @@ _.extend(BamTrack.prototype, {
 
         _this.region.center();
         var pixelDisplacement = disp*_this.pixelBase;
-        this.pixelPosition-=pixelDisplacement;
+        this.pixelPosition -= pixelDisplacement;
 
         //parseFloat important
         var move =  parseFloat(this.svgCanvasFeatures.getAttribute("x")) + pixelDisplacement;
@@ -131,7 +131,7 @@ _.extend(BamTrack.prototype, {
         if (typeof this.visibleRegionSize === 'undefined' ||
             this.region.length() < this.visibleRegionSize) {
 
-            if(disp>0 && virtualStart < this.svgCanvasLeftLimit){
+            if(disp > 0 && virtualStart < this.svgCanvasLeftLimit) {
                 var newLeft = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
                 this.dataAdapter.getData({
                     dataType: this.dataType,
@@ -150,7 +150,7 @@ _.extend(BamTrack.prototype, {
                 this.svgCanvasLeftLimit = newLeft;
             }
 
-            if(disp<0 && virtualEnd > this.svgCanvasRightLimit){
+            if(disp < 0 && virtualEnd > this.svgCanvasRightLimit) {
                 var newRight = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset);
                 this.dataAdapter.getData({
                     dataType: this.dataType,
@@ -178,12 +178,16 @@ _.extend(BamTrack.prototype, {
         var newChunks = [];
         // var chromosome = response.params.chromosome;
 
-        var feature, displayed, featureFirstChunk, featureLastChunk, features = [];
+        var feature, displayed, featureFirstChunk, featureLastChunk, features;
         for ( var i = 0, leni = chunks.length; i < leni; i++) {//loop over chunks
             if(this.chunksDisplayed[chunks[i].chunkKey] != true){//check if any chunk is already displayed and skip it
 
                 features = []; //initialize array, will contain features not drawn by other drawn chunks
-                for ( var j = 0, lenj =  chunks[i].value.reads.length; j < lenj; j++) {
+                if (!(chunks[i].value && chunks[i].value.reads)) {
+                    if (!chunks[i].value) { chunks[i].value = {}; }
+                    chunks[i].value.reads = features;
+                }
+                for ( var j = 0, lenj = chunks[i].value.reads.length; j < lenj; j++) {
                     feature = chunks[i].value.reads[j];
                     var chrChunkCache = this.dataAdapter.cache[dataType];
 
@@ -191,9 +195,9 @@ _.extend(BamTrack.prototype, {
                     displayed = false;
                     featureFirstChunk = chrChunkCache.getChunkId(feature.start);
                     featureLastChunk = chrChunkCache.getChunkId(feature.end);
-                    for(var chunkId=featureFirstChunk; chunkId<=featureLastChunk; chunkId++){//loop over chunks touched by this feature
+                    for ( var chunkId = featureFirstChunk; chunkId <= featureLastChunk; chunkId++) {//loop over chunks touched by this feature
                         var chunkKey = chrChunkCache.getChunkKey(feature.chromosome, chunkId);
-                        if(this.chunksDisplayed[chunkKey]==true){
+                        if(this.chunksDisplayed[chunkKey] == true){
                             displayed = true;
                             break;
                         }
@@ -202,7 +206,7 @@ _.extend(BamTrack.prototype, {
                         features.push(feature);
                     }
                 }
-                this.chunksDisplayed[chunks[i].chunkKey]=true;
+                this.chunksDisplayed[chunks[i].chunkKey] = true;
                 chunks[i].value.reads = features;//update features array
                 newChunks.push(chunks[i]);
             }

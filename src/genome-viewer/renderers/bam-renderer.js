@@ -78,7 +78,7 @@ _.extend(BamRenderer.prototype, {
         });
 
         var drawCoverage = function (chunk) {
-            //var coverageList = chunk.coverage.all;
+            console.log(chunk);
             var coverageList = chunk.coverage.all;
             var coverageListA = chunk.coverage.a;
             var coverageListC = chunk.coverage.c;
@@ -230,8 +230,16 @@ _.extend(BamRenderer.prototype, {
                 if (enc) {
                     var featureGroup = SVG.addChild(bamReadGroup, "g", {'feature_id': feature.name});
                     var points = {
-                        "Reverse": x + "," + (rowY + (height / 2)) + " " + (x + 5) + "," + rowY + " " + (x + width - 5) + "," + rowY + " " + (x + width - 5) + "," + (rowY + height) + " " + (x + 5) + "," + (rowY + height),
-                        "Forward": x + "," + rowY + " " + (x + width - 5) + "," + rowY + " " + (x + width) + "," + (rowY + (height / 2)) + " " + (x + width - 5) + "," + (rowY + height) + " " + x + "," + (rowY + height)
+                        "Reverse": x + "," + (rowY + (height / 2)) + " " +
+                                   (x + 5) + "," + rowY + " " +
+                                   (x + width - 5) + "," + rowY + " " +
+                                   (x + width - 5) + "," + (rowY + height) + " " +
+                                   (x + 5) + "," + (rowY + height),
+                        "Forward": x + "," + rowY + " " +
+                                   (x + width - 5) + "," + rowY + " " +
+                                   (x + width) + "," + (rowY + (height / 2)) + " " +
+                                   (x + width - 5) + "," + (rowY + height) + " " +
+                                   x + "," + (rowY + height)
                     }
                     var poly = SVG.addChild(featureGroup, "polygon", {
                         "points": points[strand],
@@ -416,7 +424,7 @@ _.extend(BamRenderer.prototype, {
         };
 
         var drawChunk = function (chunk) {
-            drawCoverage(chunk.value);
+            if (chunk.value && chunk.value.coverage) { drawCoverage(chunk.value); }
             var readList = chunk.value.reads;
             for (var i = 0, li = readList.length; i < li; i++) {
                 var read = readList[i];
