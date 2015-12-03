@@ -46,8 +46,8 @@ _.extend(BamTrack.prototype, {
                 features = event.items;
             } else {
                 _this.renderer = _this.defaultRenderer;
-                console.log("data:ready", event);
                 features = _this.getFeaturesToRenderByChunk(event);
+                // console.log("data:ready", event);
             }
             _this.renderer.render(features, {
                 svgCanvasFeatures : _this.svgCanvasFeatures,
@@ -82,7 +82,6 @@ _.extend(BamTrack.prototype, {
             this.dataType = 'histogram';
         }
 
-        console.log(this.zoom, this.visibleRange, this.visibleRegionSize, this.region.length());
         if (typeof this.visibleRegionSize === 'undefined' ||
             this.region.length() < this.visibleRegionSize) {
 

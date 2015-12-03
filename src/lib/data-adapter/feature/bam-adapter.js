@@ -44,7 +44,6 @@ function BamAdapter(args){
 
 BamAdapter.prototype = {
     host : null,
-    gzip : true,
     params : {},
 
     clearData: function() {
@@ -120,7 +119,13 @@ BamAdapter.prototype = {
                 if (!_.isUndefined(queryResult.result)) {
                     var region = new Region(queryResult.id),
                         features = queryResult.result;
-                    _this.featureCache.putFeaturesByRegion(features, region, _this.resource, dataType);
+
+                    var putfunc = _this.featureCache.putFeaturesByRegion;
+                    if (_this.params.histogram) {
+                        dataType = "histogram" + _this.params.interval;
+                        putfunc = _this.featureCache.putHistogramFeaturesByRegion;
+                    }
+                    putfunc.call(_this.featureCache, features, region, _this.resource, dataType);
 
                     var chunk = _this.featureCache.getFeatureChunksByRegion(region);
                     Array.prototype.push.apply(chunks, chunk);
@@ -143,16 +148,6 @@ BamAdapter.prototype = {
                     chunkSize: _this.featureCache.chunkSize, sender: _this
                 });
             }
-
-            // var dataType = "data";
-            // if(data.params.histogram){
-            //     dataType = "histogram" + data.params.interval;
-            //     _this.featureCache.putHistogramFeaturesByRegion(data.result, query, data.resource, dataType);
-            // }else{
-            //     _this.featureCache.putFeaturesByRegion(data.result, query, data.resource, dataType);
-            // }
-
-            // var items = _this.featureCache.getFeatureChunksByRegion(query, dataType);
         };
 
 
