@@ -23,36 +23,23 @@ function BamAdapter(args){
 
     _.extend(this, Backbone.Events);
 
-    if(typeof args != 'undefined'){
-        this.host = args.host || this.host;
-        this.category = args.category || this.category;
-        this.resource = args.resource || this.resource;
-        this.params = args.params || this.params;
-        this.filters = args.filters || this.filters;
-        this.options = args.options || this.options;
-        this.species = args.species || this.species;
-        var argsFeatureCache = args.featureCache || {};
-    }
+    _.extend(this, args || {});
+    this.featureCache = new BamCache(args.featureCache || {});
 
-    if (args != null){
-        if(args.featureConfig != null){
-            if(args.featureConfig.filters != null){
-                this.filtersConfig = args.featureConfig.filters;
-            }
-            if(args.featureConfig.options != null){//apply only check boxes
-                this.optionsConfig = args.featureConfig.options;
-                for(var i = 0; i < this.optionsConfig.length; i++){
-                    if(this.optionsConfig[i].checked == true){
-                        this.options[this.optionsConfig[i].name] = true;
-                        this.params[this.optionsConfig[i].name] = true;
-                    }
+    if (this.featureConfig != null) {
+        if (this.featureConfig.filters != null) {
+            this.filtersConfig = this.featureConfig.filters;
+        }
+        if (this.featureConfig.options != null) { //apply only check boxes
+            this.optionsConfig = this.featureConfig.options;
+            for (var i = 0; i < this.optionsConfig.length; i++) {
+                if (this.optionsConfig[i].checked == true) {
+                    this.options[this.optionsConfig[i].name] = true;
+                    this.params[this.optionsConfig[i].name] = true;
                 }
             }
         }
     }
-
-    this.featureCache = new BamCache(argsFeatureCache);
-    // this.onGetData = new Event();
 }
 
 BamAdapter.prototype = {
@@ -92,105 +79,97 @@ BamAdapter.prototype = {
 
     getData: function(args) {
         var _this = this;
-        //region check
-        this.params["histogram"] = args.histogram;
-        this.params["histogramLogarithm"] = args.histogramLogarithm;
-        this.params["histogramMax"] = args.histogramMax;
-        this.params["interval"] = args.interval;
-        this.params["transcript"] = args.transcript;
-        this.params["chromosome"] = args.chromosome;
-        this.params["resource"] = this.resource.id;
-        this.params["category"] = this.category;
-        this.params["species"] = Utils.getSpeciesCode(this.species.text);
+
+        _.extend(this.params, args);
+        this.params.resource = this.resource.oid;
+        this.params.species = Utils.getSpeciesCode(this.species.text);
 
 
-        if(args.start < 1){
-            args.start = 1;
+        var region = args.region;
+        if (region.start > 300000000 || region.end < 1) {
+            return;
         }
-        if(args.end > 300000000){
-            args.end = 300000000;
-        }
+        region.start = (region.start < 1) ? 1 : region.start;
+        region.end = (region.end > 300000000) ? 300000000 : region.end;
 
         var dataType = "data";
         if(args.histogram){
             dataType = "histogram" + args.interval;
         }
+        this.params.dataType = dataType;
 
-        this.params["dataType"] = dataType;
 
-        var firstChunk = this.featureCache._getChunk(args.start);
-        var lastChunk = this.featureCache._getChunk(args.end);
-        var chunks = [];
-        var itemList = [];
-        for(var i = firstChunk; i <= lastChunk; i++){
-            var key = args.chromosome + ":" + i;
-            if(this.featureCache.cache[key] == null || this.featureCache.cache[key][dataType] == null) {
-                chunks.push(i);
-            }else{
-                var item = this.featureCache.getFeatureChunk(key);
-                itemList.push(item);
-            }
+        //Create one FeatureChunkCache by datatype
+        if (_.isUndefined(this.cache)) { this.cache = {}; }
+        if (_.isUndefined(this.cache[dataType])) {
+            this.cache[dataType] = new FeatureChunkCache();
         }
 
+        var cachedItems = this.featureCache.getFeatureChunksByRegion(region),
+            chunksByRegion = this.cache[dataType].getCachedByRegion(region);
+
+
         var regionSuccess = function (data) {
-            var splitDots = data.query.split(":");
-            var splitDash = splitDots[1].split("-");
-            var query = { chromosome: splitDots[0], start: splitDash[0], end: splitDash[1] };
+            var timeId = _this.resource.oid + " save " + Utils.randomString(4);
+            console.time(timeId);
+            /** time log **/
 
+            var chunks = [];
+            for (var i = 0; i < data.response.length; i++) {
+                var queryResult = data.response[i];
+                if (!_.isUndefined(queryResult.result)) {
+                    var region = new Region(queryResult.id),
+                        features = queryResult.result;
+                    _this.featureCache.putFeaturesByRegion(features, region, _this.resource, dataType);
 
-            var dataType = "data";
-            if(data.params.histogram){
-                dataType = "histogram" + data.params.interval;
-                _this.featureCache.putHistogramFeaturesByRegion(data.result, query, data.resource, dataType);
-            }else{
-                _this.featureCache.putFeaturesByRegion(data.result, query, data.resource, dataType);
+                    var chunk = _this.featureCache.getFeatureChunksByRegion(region);
+                    Array.prototype.push.apply(chunks, chunk);
+                }
             }
 
-            var items = _this.featureCache.getFeatureChunksByRegion(query, dataType);
-            itemList = itemList.concat(items);
-            if(itemList.length > 0){
-                _this.trigger('data:ready',{ items: itemList, params: _this.params, cached: false, sender: _this });
-                // _this.onGetData.notify({items:itemList, params:_this.params, cached:false});
+            chunks = chunks.concat(cachedItems);
+
+            chunks.forEach(function(item) {
+                console.log("put chunk", item.key);
+                _this.cache[dataType].putChunk(item.key, true);
+            });
+
+            /** time log **/
+            console.timeEnd(timeId);
+
+            if (chunks.length > 0) {
+                _this.trigger('data:ready', {
+                    items: chunks, dataType: dataType,
+                    chunkSize: _this.featureCache.chunkSize, sender: _this
+                });
             }
+
+            // var dataType = "data";
+            // if(data.params.histogram){
+            //     dataType = "histogram" + data.params.interval;
+            //     _this.featureCache.putHistogramFeaturesByRegion(data.result, query, data.resource, dataType);
+            // }else{
+            //     _this.featureCache.putFeaturesByRegion(data.result, query, data.resource, dataType);
+            // }
+
+            // var items = _this.featureCache.getFeatureChunksByRegion(query, dataType);
         };
 
-        var querys = [];
-        var updateStart = true;
-        var updateEnd = true;
-        if(chunks.length > 0){//chunks needed to retrieve
-            // console.log(chunks);
 
-            for ( var i = 0; i < chunks.length; i++) {
+        if (chunksByRegion.notCached.length > 0) {
+            //chunks needed to retrieve
+            var querys = _.map(chunksByRegion.notCached, function (rgn) {
+                return new Region(rgn).toString();
+            });
 
-                if(updateStart){
-                    var chunkStart = parseInt(chunks[i] * this.featureCache.chunkSize);
-                    updateStart = false;
-                }
-                if(updateEnd){
-                    var chunkEnd = parseInt((chunks[i] * this.featureCache.chunkSize) +
-                                            this.featureCache.chunkSize - 1);
-                    updateEnd = false;
-                }
+            //limit queries
+            var n = 50;
+            var lists = _.groupBy(querys, function (a, b) {
+                return Math.floor(b / n);
+            });
+            var queriesList = _.toArray(lists); //Added this to convert the returned object to an array.
 
-                if(chunks[i+1] != null){
-                    if(chunks[i] + 1 == chunks[i + 1]){
-                        updateEnd =true;
-                    }else{
-                        var query = args.chromosome+":"+chunkStart+"-"+chunkEnd;
-                        querys.push(query);
-                        updateStart = true;
-                        updateEnd = true;
-                    }
-                }else{
-                    var query = args.chromosome+":"+chunkStart+"-"+chunkEnd;
-                    querys.push(query);
-                    updateStart = true;
-                    updateEnd = true;
-                }
-            }
-            // console.log(querys);
-            for ( var i = 0, li = querys.length; i < li; i++) {
-                console.time("dqs");
+            for ( var i = 0, li = queriesList.length; i < li; i++) {
                 //accountId, sessionId, bucketname, objectname, region,
                 var cookie = $.cookie("bioinfo_sid");
                 cookie = ( cookie != '' && cookie != null ) ?  cookie : 'dummycookie';
@@ -199,16 +178,17 @@ BamAdapter.prototype = {
                     sessionId: cookie,
                     bucketId: this.resource.bucketId,
                     objectId: this.resource.oid,
-                    region: querys[i],
-                    queryParams: this.params,
-                    success:regionSuccess
+                    region: queriesList[i],
+                    queryParams: {},
+                    success: regionSuccess
                 });
             }
-        }else{ //no server call
-            if(itemList.length > 0){
-                _this.trigger('data:ready',{ items: itemList, params: this.params, cached: false, sender: this });
-                // this.onGetData.notify({items:itemList, params:this.params});
-            }
+        } else if (cachedItems.length > 0) {
+            _this.trigger('data:ready',{
+                items: cachedItems, dataType: dataType,
+                params: this.params, cached: true,
+                chunkSize: _this.featureCache.chunkSize, sender: this
+            });
         }
     }
 };

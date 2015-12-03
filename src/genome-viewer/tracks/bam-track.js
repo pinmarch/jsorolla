@@ -28,7 +28,6 @@ function BamTrack(args) {
 _.extend(BamTrack.prototype, {
     initialize: function (args) {
         this.dataType = 'features';
-        this.chunksDisplayed = {};
     },
 
     render: function (targetId) {
@@ -47,7 +46,8 @@ _.extend(BamTrack.prototype, {
                 features = event.items;
             } else {
                 _this.renderer = _this.defaultRenderer;
-                features = _this._removeDisplayedChunks(event);
+                console.log("data:ready", event);
+                features = _this.getFeaturesToRenderByChunk(event);
             }
             _this.renderer.render(features, {
                 svgCanvasFeatures : _this.svgCanvasFeatures,
@@ -82,6 +82,7 @@ _.extend(BamTrack.prototype, {
             this.dataType = 'histogram';
         }
 
+        console.log(this.zoom, this.visibleRange, this.visibleRegionSize, this.region.length());
         if (typeof this.visibleRegionSize === 'undefined' ||
             this.region.length() < this.visibleRegionSize) {
 
@@ -105,7 +106,7 @@ _.extend(BamTrack.prototype, {
         }else{
             this.invalidZoomText.setAttribute("visibility", "visible");
         }
-        _this.updateHeight();
+        this.updateHeight();
     },
 
 
@@ -171,47 +172,49 @@ _.extend(BamTrack.prototype, {
         }
     },
 
-    _removeDisplayedChunks: function (response) {
-        //Returns an array avoiding already drawn features in this.chunksDisplayed
-        var chunks = response.items;
-        var dataType = response.dataType;
-        var newChunks = [];
-        // var chromosome = response.params.chromosome;
+    getFeaturesToRenderByChunk: function (response) {
+        var newitems = [],
+            newresponse = {};
+        _.extend(newresponse, response);
 
-        var feature, displayed, featureFirstChunk, featureLastChunk, features;
-        for ( var i = 0, leni = chunks.length; i < leni; i++) {//loop over chunks
-            if(this.chunksDisplayed[chunks[i].chunkKey] != true){//check if any chunk is already displayed and skip it
+        // Returns an array avoiding already drawn features in this.chunksDisplayed
+        var chunks = response.items,
+            dataType = response.dataType;
 
-                features = []; //initialize array, will contain features not drawn by other drawn chunks
-                if (!(chunks[i].value && chunks[i].value.reads)) {
-                    if (!chunks[i].value) { chunks[i].value = {}; }
-                    chunks[i].value.reads = features;
-                }
-                for ( var j = 0, lenj = chunks[i].value.reads.length; j < lenj; j++) {
-                    feature = chunks[i].value.reads[j];
-                    var chrChunkCache = this.dataAdapter.cache[dataType];
+        for ( var i = 0, leni = chunks.length; i < leni; i++) {
+            if(this.chunksDisplayed[chunks[i].key] != true){
+            // check if any chunk is already displayed and skip it
+
+                var features = [];
+                for (var j = 0, lenj = chunks[i].reads.length; j < lenj; j++) {
+                    var feature = chunks[i].reads[j],
+                        chrChunkCache = this.dataAdapter.cache[dataType],
+                        featureFirstChunk = chrChunkCache.getChunkId(feature.start),
+                        featureLastChunk = chrChunkCache.getChunkId(feature.end),
+                        displayed = false;
 
                     //check if any feature has been already displayed by another chunk
-                    displayed = false;
-                    featureFirstChunk = chrChunkCache.getChunkId(feature.start);
-                    featureLastChunk = chrChunkCache.getChunkId(feature.end);
-                    for ( var chunkId = featureFirstChunk; chunkId <= featureLastChunk; chunkId++) {//loop over chunks touched by this feature
+                    for (var chunkId = featureFirstChunk; chunkId <= featureLastChunk; chunkId++) {
                         var chunkKey = chrChunkCache.getChunkKey(feature.chromosome, chunkId);
                         if(this.chunksDisplayed[chunkKey] == true){
                             displayed = true;
                             break;
                         }
                     }
-                    if(!displayed){
+                    if (!displayed) {
                         features.push(feature);
                     }
                 }
-                this.chunksDisplayed[chunks[i].chunkKey] = true;
-                chunks[i].value.reads = features;//update features array
-                newChunks.push(chunks[i]);
+                this.chunksDisplayed[chunks[i].key] = true;
+
+                var newchunk = {};
+                _.extend(newchunk, chunks[i]);
+                newchunk.reads = features;
+                newitems.push(newchunk);
             }
         }
-        response.items = newChunks;
-        return response;
+
+        _.extend(newresponse, { items: newitems });
+        return newresponse;
     }
 });

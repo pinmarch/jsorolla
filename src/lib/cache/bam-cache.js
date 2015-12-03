@@ -24,24 +24,15 @@ function BamCache(args) {
     this.id = Math.round(Math.random() * 10000000); // internal id for this class
 
     this.chunkSize = 50000;
-    this.gzip = true;
+    this.gzip = false;
     this.maxSize = 10*1024*1024;
     this.size = 0;
 
     if (args != null){
-        if(args.chunkSize != null){
-            this.chunkSize = args.chunkSize;
-        }
-        if(args.gzip != null){
-            this.gzip = args.gzip;
-        }
+        _.extend(this, args);
     }
 
     this.cache = {};
-
-    //deprecated trackSvg has this object now
-    //this.chunksDisplayed = {};
-
     this.maxFeaturesInterval = 0;//for local histogram
 };
 
@@ -60,12 +51,12 @@ BamCache.prototype = {
     },
 
     getFeatureChunksByRegion: function(region) {
-        var firstRegionChunk, lastRegionChunk, chunks = [], key;
-        firstRegionChunk = this._getChunk(region.start);
-        lastRegionChunk = this._getChunk(region.end);
+        var chunks = [],
+            firstRegionChunk = this._getChunk(region.start),
+            lastRegionChunk = this._getChunk(region.end);
+
         for (var i = firstRegionChunk; i <= lastRegionChunk; i++) {
-            key = region.chromosome + ":" + i;
-            // check if this key exists in cache (features from files)
+            var key = region.chromosome + ":" + i;
             if(this.cache[key] != null) {
                 chunks.push(this.cache[key]);
             }
@@ -74,92 +65,56 @@ BamCache.prototype = {
     },
 
     putFeaturesByRegion: function(resultObj, region, featureType, dataType) {
-        var key, firstChunk, lastChunk, firstRegionChunk, lastRegionChunk, read, gzipRead;
-        var reads = resultObj.reads;
-        var coverage = resultObj.coverage;
+        var reads = resultObj.reads,
+            coverage = resultObj.coverage;
 
         //initialize region
-        firstRegionChunk = this._getChunk(region.start);
-        lastRegionChunk = this._getChunk(region.end);
+        var firstRegionChunk = this._getChunk(region.start),
+            lastRegionChunk = this._getChunk(region.end),
+            chunkIndex = 0;
 
-        var chunkIndex = 0;
-        console.time("BamCache.prototype.putFeaturesByRegion1")
-        //TODO the region for now is a chunk region, so this for is always 1 loop
-        for(var i=firstRegionChunk, c=0; i<=lastRegionChunk; i++, c++){
-            key = region.chromosome+":"+i;
-            if(this.cache[key]==null || this.cache[key][dataType] == null){
-                this.cache[key] = {};
-                this.cache[key][dataType] = [];
-                this.cache[key].key = key;
-                this.cache[key].start = parseInt(region.start)+(c*this.chunkSize);
-                this.cache[key].end = parseInt(region.start)+((c+1)*this.chunkSize)-1;
-            }
-            if(dataType === 'data'){
-                //divide the coverage array in multiple arrays of chunksize length
-                // var chunkCoverage = coverage.slice(chunkIndex,chunkIndex+this.chunkSize);
-                var chunkCoverageAll = coverage.all.slice(chunkIndex,chunkIndex+this.chunkSize);
-                var chunkCoverageA = coverage.a.slice(chunkIndex,chunkIndex+this.chunkSize);
-                var chunkCoverageC = coverage.c.slice(chunkIndex,chunkIndex+this.chunkSize);
-                var chunkCoverageG = coverage.g.slice(chunkIndex,chunkIndex+this.chunkSize);
-                var chunkCoverageT = coverage.t.slice(chunkIndex,chunkIndex+this.chunkSize);
-                var chunkCoverage = {
-                    "all":chunkCoverageAll,
-                    "a":chunkCoverageA,
-                    "c":chunkCoverageC,
-                    "g":chunkCoverageG,
-                    "t":chunkCoverageT
-                };
-            }
-
-            if(this.gzip) {
-                this.cache[key]["coverage"]=RawDeflate.deflate(JSON.stringify(chunkCoverage));
-            }else{
-                this.cache[key]["coverage"]=chunkCoverage;
-            }
-            chunkIndex+=this.chunkSize;
-        }
-        console.timeEnd("BamCache.prototype.putFeaturesByRegion1");
-        console.time("BamCache.prototype.putFeaturesByRegion");
-        var ssss = 0;
-
-
-        if(dataType === 'data'){
-            for(var index = 0, len = reads.length; index<len; index++) {
-                read = reads[index];
-                read.featureType = 'bam';
-                firstChunk = this._getChunk(read.start);
-                lastChunk = this._getChunk(read.end == 0?read.end=-1:read.end);//0 is not a position, i set to -1 to avoid enter in for
-                // Some reads has end = 0. So will not be drawn IGV does not draw those reads
-
-                if(this.gzip) {
-                    gzipRead = RawDeflate.deflate(JSON.stringify(read));
-                    //ssss+= gzipRead.length;
-                }else{
-                    gzipRead = read;
-                    //ssss+= JSON.stringify(gzipRead).length;
+        if (reads[0] && reads[0].chromosome == region.chromosome) {
+            for (var i = firstRegionChunk, c = 0; i <= lastRegionChunk; i++, c++) {
+                var key = region.chromosome + ":" + i;
+                if(this.cache[key] == null || this.cache[key][dataType] == null){
+                    this.cache[key] = {};
+                    this.cache[key].key = key;
+                    this.cache[key].start = parseInt(region.start)+(c * this.chunkSize);
+                    this.cache[key].end = parseInt(region.start)+((c + 1) * this.chunkSize) - 1;
                 }
 
-                for(var i = firstChunk, c = 0; i <= lastChunk; i++, c++) {
-                    if(i >= firstRegionChunk && i <= lastRegionChunk) {//only if is inside the called region
-                        key = read.chromosome + ":" + i;
-                        // if(this.cache[key].start==null){
-                        //     this.cache[key].start = parseInt(region.start)+(c*this.chunkSize);
-                        // }
-                        // if(this.cache[key].end==null){
-                        //     this.cache[key].end = parseInt(region.start)+((c+1)*this.chunkSize)-1;
-                        // }
-                        // if(this.cache[key][dataType] != null){
-                        //     this.cache[key][dataType] = [];
-                            this.cache[key][dataType].push(gzipRead);
-                        // }
+                this.cache[key].reads =
+                    reads.filter(function(read) {
+                        var firstChunk = this._getChunk(read.start),
+                            lastChunk = this._getChunk(read.end == 0 ? read.end = -1 : read.end);
+                        // 0 is not a position, i set to -1 to avoid enter in for
+                        // Some reads has end = 0. So will not be drawn IGV does not draw those reads
+                        return (firstChunk <= i && lastChunk >= i);
+                    }, this).map(function(read) {
+                        read.featureType = 'bam';
+                        return read;
+                    });
+                console.log("bam cached", key, this.cache[key]);
 
-                    }
+                var chunkCoverage = {};
+                if(dataType === 'data'){
+                    // divide the coverage array in multiple arrays of chunksize length
+                    var chunkCoverageAll = coverage.all.slice(chunkIndex, chunkIndex + this.chunkSize),
+                        chunkCoverageA = coverage.a.slice(chunkIndex, chunkIndex + this.chunkSize),
+                        chunkCoverageC = coverage.c.slice(chunkIndex, chunkIndex + this.chunkSize),
+                        chunkCoverageG = coverage.g.slice(chunkIndex, chunkIndex + this.chunkSize),
+                        chunkCoverageT = coverage.t.slice(chunkIndex, chunkIndex + this.chunkSize);
+                    chunkCoverage = {
+                        "all":chunkCoverageAll,
+                        "a":chunkCoverageA, "c":chunkCoverageC,
+                        "g":chunkCoverageG, "t":chunkCoverageT
+                    };
                 }
+                this.cache[key].coverage = chunkCoverage;
+
+                chunkIndex += this.chunkSize;
             }
         }
-
-        console.timeEnd("BamCache.prototype.putFeaturesByRegion");
-        console.log("BamCache.prototype.putFeaturesByRegion"+ssss);
     },
 
     clear: function() {

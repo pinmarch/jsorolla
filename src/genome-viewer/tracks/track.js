@@ -65,7 +65,7 @@ function Track(args) {
     this.histogramRenderer = new HistogramRenderer(args);
 
     if (_.isFunction(this.initialize)) {
-        this.initialize.apply(this, args);
+        this.initialize.call(this, args);
     }
 
     this.on(this.handlers);
@@ -456,32 +456,27 @@ Track.prototype = {
             return chromosome + ":" + chunkId;
         };
 
-        var chunks = response.items;
-        var features = [];
+        var chunks = response.items,
+            features = [];
 
-
-        var feature, displayed, featureFirstChunk, featureLastChunk, features = [];
         for (var i = 0, leni = chunks.length; i < leni; i++) {
             //check if any chunk is already displayed and skip it
             if (this.chunksDisplayed[chunks[i].chunkKey] != true) {
 
-                for (var j = 0, lenj = chunks[i].value.length; j < lenj; j++) {
-                    feature = chunks[i].value[j];
-
+                for (var j = 0, lenj = chunks[i].value ? chunks[i].value.length : 0; j < lenj; j++) {
                     //check if any feature has been already displayed by another chunk
-                    displayed = false;
-                    featureFirstChunk = getChunkId(feature.start);
-                    featureLastChunk = getChunkId(feature.end);
+                    var feature = chunks[i].value[j],
+                        featureFirstChunk = getChunkId(feature.start),
+                        featureLastChunk = getChunkId(feature.end),
+                        displayed = false;
                     for (var chunkId = featureFirstChunk; chunkId <= featureLastChunk; chunkId++) {
-                        var chunkKey = getChunkKey(feature.chromosome, chunkId);
-                        if (this.chunksDisplayed[chunkKey] == true) {
+                        var key = getChunkKey(feature.chromosome, chunkId);
+                        if (this.chunksDisplayed[key] == true) {
                             displayed = true;
                             break;
                         }
                     }
-                    if (!displayed) {
-                        features.push(feature);
-                    }
+                    if (!displayed) { features.push(feature); }
                 }
                 this.chunksDisplayed[chunks[i].chunkKey] = true;
             }

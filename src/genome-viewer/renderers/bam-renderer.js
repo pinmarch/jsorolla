@@ -35,17 +35,16 @@ _.extend(BamRenderer.prototype, {
     render: function (response, args) {
         var _this = this;
 
-
         //CHECK VISUALIZATON MODE
         if (_.isUndefined(response.params)) {
-            response.params = {};
+            response.params = { resource: "unknown" };
         }
 
         var viewAsPairs = false;
         if (response.params["view_as_pairs"] != null) {
             viewAsPairs = true;
         }
-        console.log("viewAsPairs " + viewAsPairs);
+
         var insertSizeMin = 0;
         var insertSizeMax = 0;
         var variantColor = "orangered";
@@ -53,6 +52,8 @@ _.extend(BamRenderer.prototype, {
             insertSizeMin = response.params["insert_size_interval"].split(",")[0];
             insertSizeMax = response.params["insert_size_interval"].split(",")[1];
         }
+
+        console.log("viewAsPairs " + viewAsPairs);
         console.log("insertSizeMin " + insertSizeMin);
         console.log("insertSizeMin " + insertSizeMax);
 
@@ -62,12 +63,10 @@ _.extend(BamRenderer.prototype, {
             e.preventDefault();
         });
 
+        console.log(response.params, response.items);
         console.time("BamRender " + response.params.resource);
 
-        var chunkList = response.items;
-
-        // var middle = this.width / 2;
-
+        var chunkList = response.items || [];
         var bamCoverGroup = SVG.addChild(args.svgCanvasFeatures, "g", {
             "class": "bamCoverage",
             "cursor": "pointer"
@@ -165,19 +164,6 @@ _.extend(BamRenderer.prototype, {
                 position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
                 style: { width: true, classes: _this.toolTipfontClass + ' ui-tooltip-shadow'}
             });
-
-
-           // args.trackSvgLayout.onMousePosition.addEventListener(function (sender, obj) {
-           //     var pos = obj.mousePos - parseInt(chunk.start);
-           //     //if(coverageList[pos]!=null){
-           //     var str = 'depth: <span class="ssel">' + coverageList[pos] + '</span><br>' +
-           //         '<span style="color:green">A</span>: <span class="ssel">' + chunk.coverage.a[pos] + '</span><br>' +
-           //         '<span style="color:blue">C</span>: <span class="ssel">' + chunk.coverage.c[pos] + '</span><br>' +
-           //         '<span style="color:darkgoldenrod">G</span>: <span class="ssel">' + chunk.coverage.g[pos] + '</span><br>' +
-           //         '<span style="color:red">T</span>: <span class="ssel">' + chunk.coverage.t[pos] + '</span><br>';
-           //     $(dummyRect).qtip('option', 'content.text', str);
-           //     //}
-           // });
         };
 
         var drawSingleRead = function (feature) {
@@ -212,16 +198,10 @@ _.extend(BamRenderer.prototype, {
             var width = length * args.pixelBase;
             //calculate x to draw svg rect
             var x = _this.getFeatureX(feature, args);
-            // try{
-            //  var maxWidth = Math.max(width, /*settings.getLabel(feature).length*8*/0); //XXX cuidado : text.getComputedTextLength()
-            // }catch(e){
-            //  var maxWidth = 72;
-            // }
             maxWidth = width;
 
             var rowHeight = 12;
             var rowY = 70;
-            // var textY = 12+settings.height;
             while (true) {
                 if (args.renderedArea[rowY] == null) {
                     args.renderedArea[rowY] = new FeatureBinarySearchTree();
@@ -266,7 +246,6 @@ _.extend(BamRenderer.prototype, {
                     break;
                 }
                 rowY += rowHeight;
-                // textY += rowHeight;
             }
         };
 
@@ -317,7 +296,6 @@ _.extend(BamRenderer.prototype, {
 
             var rowHeight = 12;
             var rowY = 70;
-            // var textY = 12+settings.height;
 
             while (true) {
                 if (args.renderedArea[rowY] == null) {
@@ -419,13 +397,12 @@ _.extend(BamRenderer.prototype, {
                     break;
                 }
                 rowY += rowHeight;
-                // textY += rowHeight;
             }
         };
 
         var drawChunk = function (chunk) {
-            if (chunk.value && chunk.value.coverage) { drawCoverage(chunk.value); }
-            var readList = chunk.value.reads;
+            if (chunk.coverage) { drawCoverage(chunk); }
+            var readList = chunk.reads;
             for (var i = 0, li = readList.length; i < li; i++) {
                 var read = readList[i];
                 if (viewAsPairs) {
