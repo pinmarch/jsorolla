@@ -53,17 +53,16 @@ _.extend(BamRenderer.prototype, {
             insertSizeMax = response.params["insert_size_interval"].split(",")[1];
         }
 
-        console.log("viewAsPairs " + viewAsPairs);
-        console.log("insertSizeMin " + insertSizeMin);
-        console.log("insertSizeMin " + insertSizeMax);
+        // console.log("viewAsPairs " + viewAsPairs);
+        // console.log("insertSizeMin " + insertSizeMin);
+        // console.log("insertSizeMin " + insertSizeMax);
 
         //Prevent browser context menu
         $(args.svgCanvasFeatures).contextmenu(function (e) {
-            console.log("click derecho")
+            // console.log("click derecho")
             e.preventDefault();
         });
 
-        console.log(response.params, response.items);
         console.time("BamRender " + response.params.resource);
 
         var chunkList = response.items || [];
@@ -158,12 +157,11 @@ _.extend(BamRenderer.prototype, {
                 "cursor": "pointer"
             });
 
-
-            $(dummyRect).qtip({
-                content: " ",
-                position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
-                style: { width: true, classes: _this.toolTipfontClass + ' ui-tooltip-shadow'}
-            });
+            // $(dummyRect).qtip({
+            //     content: " ",
+            //     position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
+            //     style: { width: true, classes: _this.toolTipfontClass + ' ui-tooltip-shadow'}
+            // });
         };
 
         var drawSingleRead = function (feature) {
@@ -422,11 +420,7 @@ _.extend(BamRenderer.prototype, {
         };
 
         //process features
-        if (chunkList.length > 0) {
-            for (var i = 0, li = chunkList.length; i < li; i++) {
-                drawChunk(chunkList[i]);
-            }
-        }
+        chunkList.forEach(drawChunk);
         console.timeEnd("BamRender " + response.params.resource);
     }
 });

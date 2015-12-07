@@ -68,12 +68,12 @@ BamCache.prototype = {
         var reads = resultObj.reads,
             coverage = resultObj.coverage;
 
-        //initialize region
-        var firstRegionChunk = this._getChunk(region.start),
-            lastRegionChunk = this._getChunk(region.end),
-            chunkIndex = 0;
-
         if (reads[0] && reads[0].chromosome == region.chromosome) {
+            //initialize region
+            var firstRegionChunk = this._getChunk(region.start),
+                lastRegionChunk = this._getChunk(region.end),
+                chunkIndex = 0;
+
             for (var i = firstRegionChunk, c = 0; i <= lastRegionChunk; i++, c++) {
                 var key = region.chromosome + ":" + i;
                 if(this.cache[key] == null || this.cache[key][dataType] == null){
@@ -94,23 +94,22 @@ BamCache.prototype = {
                         read.featureType = 'bam';
                         return read;
                     });
-                console.log("bam cached", key, this.cache[key]);
+                // console.log("bam cached", key, reads.length, this.cache[key].reads.length, this.cache[key]);
 
-                var chunkCoverage = {};
-                if(dataType === 'data'){
+                this.cache[key].coverage = undefined;
+                if (dataType == 'data' && this.cache[key].reads.length > 0) {
                     // divide the coverage array in multiple arrays of chunksize length
                     var chunkCoverageAll = coverage.all.slice(chunkIndex, chunkIndex + this.chunkSize),
                         chunkCoverageA = coverage.a.slice(chunkIndex, chunkIndex + this.chunkSize),
                         chunkCoverageC = coverage.c.slice(chunkIndex, chunkIndex + this.chunkSize),
                         chunkCoverageG = coverage.g.slice(chunkIndex, chunkIndex + this.chunkSize),
                         chunkCoverageT = coverage.t.slice(chunkIndex, chunkIndex + this.chunkSize);
-                    chunkCoverage = {
+                    this.cache[key].coverage = {
                         "all":chunkCoverageAll,
                         "a":chunkCoverageA, "c":chunkCoverageC,
                         "g":chunkCoverageG, "t":chunkCoverageT
                     };
                 }
-                this.cache[key].coverage = chunkCoverage;
 
                 chunkIndex += this.chunkSize;
             }

@@ -90,6 +90,7 @@ BamAdapter.prototype = {
         }
         region.start = (region.start < 1) ? 1 : region.start;
         region.end = (region.end > 300000000) ? 300000000 : region.end;
+        // console.log("cache target", region);
 
         var dataType = "data";
         if(args.histogram){
@@ -98,7 +99,7 @@ BamAdapter.prototype = {
         this.params.dataType = dataType;
 
 
-        //Create one FeatureChunkCache by datatype
+        // Create one FeatureChunkCache by datatype
         if (_.isUndefined(this.cache)) { this.cache = {}; }
         if (_.isUndefined(this.cache[dataType])) {
             this.cache[dataType] = new FeatureChunkCache();
@@ -119,6 +120,7 @@ BamAdapter.prototype = {
                 if (!_.isUndefined(queryResult.result)) {
                     var region = new Region(queryResult.id),
                         features = queryResult.result;
+                    _.extend(region, { start: features.start, end: features.end });
 
                     var putfunc = _this.featureCache.putFeaturesByRegion;
                     if (_this.params.histogram) {
@@ -135,7 +137,7 @@ BamAdapter.prototype = {
             chunks = chunks.concat(cachedItems);
 
             chunks.forEach(function(item) {
-                console.log("put chunk", item.key);
+                // console.log("put chunk", item.key);
                 _this.cache[dataType].putChunk(item.key, true);
             });
 
@@ -164,7 +166,7 @@ BamAdapter.prototype = {
             });
             var queriesList = _.toArray(lists); //Added this to convert the returned object to an array.
 
-            for ( var i = 0, li = queriesList.length; i < li; i++) {
+            for (var i = 0, li = queriesList.length; i < li; i++) {
                 //accountId, sessionId, bucketname, objectname, region,
                 var cookie = $.cookie("bioinfo_sid");
                 cookie = ( cookie != '' && cookie != null ) ?  cookie : 'dummycookie';
