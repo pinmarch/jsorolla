@@ -166,19 +166,32 @@ BamAdapter.prototype = {
             });
             var queriesList = _.toArray(lists); //Added this to convert the returned object to an array.
 
+            var uselocaldata = this.localDataSource &&
+                               this.localDataSource instanceof BamFileDataSource;
+
             for (var i = 0, li = queriesList.length; i < li; i++) {
-                //accountId, sessionId, bucketname, objectname, region,
-                var cookie = $.cookie("bioinfo_sid");
-                cookie = ( cookie != '' && cookie != null ) ?  cookie : 'dummycookie';
-                OpencgaManager.region({
-                    accountId: this.resource.account,
-                    sessionId: cookie,
-                    bucketId: this.resource.bucketId,
-                    objectId: this.resource.oid,
-                    region: queriesList[i],
-                    queryParams: {},
-                    success: regionSuccess
-                });
+                if (uselocaldata) {
+                    this.localDataSource.region({
+                        bucketId: this.resource.bucketId,
+                        objectId: this.resource.oid,
+                        region: queriesList[i],
+                        queryParams: {},
+                        success: regionSuccess
+                    });
+                } else {
+                    //accountId, sessionId, bucketname, objectname, region,
+                    var cookie = $.cookie("bioinfo_sid");
+                    cookie = ( cookie != '' && cookie != null ) ?  cookie : 'dummycookie';
+                    OpencgaManager.region({
+                        accountId: this.resource.account,
+                        sessionId: cookie,
+                        bucketId: this.resource.bucketId,
+                        objectId: this.resource.oid,
+                        region: queriesList[i],
+                        queryParams: {},
+                        success: regionSuccess
+                    });
+                }
             }
         } else if (cachedItems.length > 0) {
             _this.trigger('data:ready',{

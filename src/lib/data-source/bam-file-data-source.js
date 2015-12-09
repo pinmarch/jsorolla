@@ -17,7 +17,7 @@
 
 
 function BamFileDataSource(args) {
-    DataSource.prototype.constructor.call(this, args);
+    DataSource.call(this, args);
 
     _.extend(this, Backbone.Events);
 
@@ -31,7 +31,7 @@ function BamFileDataSource(args) {
     _.extend(this, args);
 };
 
-BamFileDataSource.prototype = {};
+BamFileDataSource.prototype = new DataSource();
 
 _.extend(BamFileDataSource.prototype, {
     BAM_MAGIC: 0x14d4142,
@@ -626,24 +626,30 @@ function readBamRecords(ba, offset, sink, min, max, chrId, opts) {
         var tlen = readInt(ba, offset + 32);
     
         record.segment = refID; // this.indexToChr[refID];
-        record.flag = flag;
-        record.pos = pos;
-        record.mq = mq;
-        record.options = {};
-        if (opts.light) {
-            record.seqLength = lseq;
-        } else {
+        record.flags = flag;
+        record.start = pos;
+        record.mappingQuality = mq;
+        record.readLength = lseq;
+        record.blocks = lseq; // fix after
+        record.end = pos + lseq; // fix after
+        record.unclippedStart = pos; // fix after
+        record.unclippedEnd = pos + lseq; // fix after
+        record.inferredInsertSize = tlen; // correct?
+        record.attributes = {};
+
+        var readName = '';
+        for (var j = 0; j < nl-1; ++j) {
+            readName += String.fromCharCode(ba[offset + 36 + j]);
+        }
+        record.name = readName;
+
+
+        if (!opts.light) {
             if (nextRef >= 0) {
-                record.nextSegment = nextRef; // this.indexToChr[nextRef];
-                record.nextPos = nextPos;
+                record.mateSegment = nextRef; // this.indexToChr[nextRef];
+                record.mateAlignmentStart = nextPos;
             }
 
-            var readName = '';
-            for (var j = 0; j < nl-1; ++j) {
-                readName += String.fromCharCode(ba[offset + 36 + j]);
-            }
-            record.readName = readName;
-        
             var p = offset + 36 + nl;
 
             var cigar = '';
@@ -653,7 +659,31 @@ function readBamRecords(ba, offset, sink, min, max, chrId, opts) {
                 p += 4;
             }
             record.cigar = cigar;
-        
+
+            // fix unclippedStart, unclippedEnd, blocks
+            if (/\d+S/.test(cigar)) {
+                var matched = cigar.match(/\d+\w/g),
+                    clippedlen = 0;
+                if (/S$/.test(matched[0])) {
+                    var m2 = matched[0].match(/\d+/);
+                    record.unclippedStart -= m2[0]|0;
+                    clippedlen += m2[0]|0;
+                }
+                if (/S$/.test(matched[matched.length - 1])) {
+                    var m2 = matched[matched.length - 1].match(/\d+/);
+                    record.unclippedEnd += m2[0]|0;
+                    clippedlen += m2[0]|0;
+                }
+                matched
+                    .filter(function(x) { return /I$/.test(x); })
+                    .forEach(function(x) {
+                        var m2 = x.match(/\d+/);
+                        clippedlen += m2[0]|0;
+                    });
+                record.blocks = lseq - clippedlen;
+                // console.log(matched, "clipped", clippedlen);
+            }
+
             var seq = '';
             var seqBytes = (lseq + 1) >> 1;
             for (var j = 0; j < seqBytes; ++j) {
@@ -663,14 +693,14 @@ function readBamRecords(ba, offset, sink, min, max, chrId, opts) {
                     seq += record.SEQRET_DECODER[(sb & 0x0f)];
             }
             p += seqBytes;
-            record.seq = seq;
+            record.read = seq;
 
             var qseq = '';
             for (var j = 0; j < lseq; ++j) {
                 qseq += String.fromCharCode(ba[p + j] + 33);
             }
             p += lseq;
-            record.quals = qseq;
+            record.baseQualityString = qseq;
 
             while (p < blockEnd) {
                 var tag = String.fromCharCode(ba[p], ba[p + 1]);
@@ -733,16 +763,16 @@ function readBamRecords(ba, offset, sink, min, max, chrId, opts) {
                 } else {
                     throw 'Unknown type '+ type;
                 }
-                record.options[tag] = value;
+                record.attributes[tag] = value;
             }
         }
 
-        if (!min || record.pos <= max && record.pos + lseq >= min) {
-            if (chrId === undefined || refID == chrId) {
+        if (!min || record.start <= max && record.start + lseq >= min) {
+            if (chrId == undefined || refID == chrId) {
                 sink.push(record);
             }
         }
-        if (record.pos > max) {
+        if (record.start > max) {
             return true;
         }
         offset = blockEnd;
