@@ -97,7 +97,7 @@ BamCache.prototype = {
                 // console.log("bam cached", key, reads.length, this.cache[key].reads.length, this.cache[key]);
 
                 this.cache[key].coverage = undefined;
-                if (dataType == 'data' && this.cache[key].reads.length > 0) {
+                if (dataType == 'data' && this.cache[key].reads.length > 0 && coverage) {
                     // divide the coverage array in multiple arrays of chunksize length
                     var chunkCoverageAll = coverage.all.slice(chunkIndex, chunkIndex + this.chunkSize),
                         chunkCoverageA = coverage.a.slice(chunkIndex, chunkIndex + this.chunkSize),

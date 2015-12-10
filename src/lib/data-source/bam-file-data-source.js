@@ -26,6 +26,7 @@ function BamFileDataSource(args) {
     this.async = true;
     this.maxSize = 500 * 1024 * 1024;
     this.type = 'binary';
+    this.suppressErrors = false;
 
     //set instantiation args, must be last
     _.extend(this, args);
@@ -52,7 +53,7 @@ _.extend(BamFileDataSource.prototype, {
     },
 
     error: function (msg) {
-        var e2w = false;
+        var e2w = this.suppressErrors;
         this.trigger('error', { message: msg, sender: this, suppress: e2w });
         if (e2w) {
             console.warn(msg);
@@ -357,9 +358,9 @@ _.extend(BamFileDataSource.prototype, {
                 this.error('Error in index fetch');
             }
         }
-        if (chunks.length == 0) {
-            console.warn("No chunks to collect reads.", chr, min, max);
-        }
+        // if (chunks.length == 0) {
+        //     console.warn("No chunks to collect reads.", chr, min, max);
+        // }
 
 
         var loadedRecords = [], stopLoading = false;
@@ -374,6 +375,19 @@ _.extend(BamFileDataSource.prototype, {
             return records;
         }
 
+        function addChromosome(reads) {
+            // set read.chromosome from read.segment
+            var indexToChr = _this.bamheader.indexToChr,
+                aliasmap = _this.bamheader.aliasmap;
+            reads.forEach(function(r) {
+                r.chromosome = aliasmap[r.segment];
+                if (r.mateSegment) {
+                    r.mateReferenceName = aliasmap[r.mateSegment];
+                }
+            });
+            return reads;
+        }
+
         function loadBamdata(index) {
             var ch = chunks[index],
                 fetchMin = ch.minv.block,
@@ -385,6 +399,7 @@ _.extend(BamFileDataSource.prototype, {
             bamreader.onload = function (evt) {
                 data = unbgzf(evt.target.result, ch.maxv.block - ch.minv.block + 1);
                 var records = loadBamreads(index, data);
+                records = addChromosome(records);
                 loadedRecords = loadedRecords.concat(records);
 
                 console.log("Loaded reads:", records.length, "at chunk", index);
@@ -407,6 +422,11 @@ _.extend(BamFileDataSource.prototype, {
                     region: new Region({ chromosome: chr, start: min, end: max }),
                     reads: loadedRecords, sender: _this
                 });
+
+                if (_.isFunction(opts.callback)) {
+                    opts.callback(loadedRecords);
+                }
+
                 return;
             }
             loadBamdata(index);
@@ -419,7 +439,21 @@ _.extend(BamFileDataSource.prototype, {
 
     region: function(args) {
         // interface for BamAdapter.getData()
-        args.success({ response: [] });
+        var _this = this,
+            regions_id = args.region;
+        if (_.isString(regions_id)) { regions_id = regions_id.split(","); }
+
+        regions_id.forEach(function(r) {
+            var range = r.split(/[:\-]/g),
+                response = { id: r, result: [] },
+                sendres = function(records) {
+                    response.result = {
+                        start: range[1], end: range[2], reads: records
+                    };
+                    args.success({ response: [ response ] });
+                };
+            _this.collectReads(range[0], range[1], range[2], { callback: sendres });
+        });
     },
 });
 
