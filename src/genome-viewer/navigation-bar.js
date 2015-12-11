@@ -447,8 +447,8 @@ NavigationBar.prototype = {
             disp = Math.round((positions * 10) / pixelBase),
             region = new Region({
                 chromosome: this.region.chromosome,
-                start: region.start - disp,
-                end: region.end - disp
+                start: this.region.start - disp,
+                end: this.region.end - disp
             });
         this.moveRegion(region);
         this.trigger('region:move', {region: region, disp: disp, sender: this});

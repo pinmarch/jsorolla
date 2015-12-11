@@ -363,6 +363,18 @@ _.extend(BamFileDataSource.prototype, {
         // }
 
 
+        opts.segment2chrom = function (reads) {
+            // set read.chromosome from read.segment
+            var aliasmap = _this.bamheader.aliasmap;
+            reads.forEach(function(r) {
+                r.chromosome = aliasmap[r.segment];
+                if (r.mateSegment) {
+                    r.mateReferenceName = aliasmap[r.mateSegment];
+                }
+            });
+            return reads;
+        };
+
         var loadedRecords = [], stopLoading = false;
 
         function loadBamreads(index, data) {
@@ -375,19 +387,6 @@ _.extend(BamFileDataSource.prototype, {
             return records;
         }
 
-        function addChromosome(reads) {
-            // set read.chromosome from read.segment
-            var indexToChr = _this.bamheader.indexToChr,
-                aliasmap = _this.bamheader.aliasmap;
-            reads.forEach(function(r) {
-                r.chromosome = aliasmap[r.segment];
-                if (r.mateSegment) {
-                    r.mateReferenceName = aliasmap[r.mateSegment];
-                }
-            });
-            return reads;
-        }
-
         function loadBamdata(index) {
             var ch = chunks[index],
                 fetchMin = ch.minv.block,
@@ -395,11 +394,10 @@ _.extend(BamFileDataSource.prototype, {
                 bamblob = _this.bamfile.slice(fetchMin, fetchMax),
                 bamreader = new FileReader();
 
-            console.log("loadBamdata", fetchMin, fetchMax, fetchMax - fetchMin);
+            // console.log("loadBamdata", fetchMin, fetchMax, fetchMax - fetchMin);
             bamreader.onload = function (evt) {
                 data = unbgzf(evt.target.result, ch.maxv.block - ch.minv.block + 1);
                 var records = loadBamreads(index, data);
-                records = addChromosome(records);
                 loadedRecords = loadedRecords.concat(records);
 
                 console.log("Loaded reads:", records.length, "at chunk", index);
@@ -799,6 +797,10 @@ function readBamRecords(ba, offset, sink, min, max, chrId, opts) {
                 }
                 record.attributes[tag] = value;
             }
+        }
+
+        if (_.isFunction(opts.segment2chrom)) {
+            opts.segment2chrom([record]);
         }
 
         if (!min || record.start <= max && record.start + lseq >= min) {
