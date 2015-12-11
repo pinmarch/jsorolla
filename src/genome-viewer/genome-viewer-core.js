@@ -298,35 +298,37 @@ GenomeViewer.prototype = {
     _createNavigationBar: function (targetId) {
         var _this = this;
 
-        if (!$.isFunction(this.quickSearchResultFn)) {
-            this.quickSearchResultFn = function (query) {
-                var results = [];
-                var speciesCode = Utils.getSpeciesCode(this.species.text).substr(0, 3);
-
-                CellBaseManager.get({
-                    //host: 'http://ws.bioinfo.cipf.es/cellbase/rest',
-                    species: speciesCode,
-                    version: 'latest',
-                    category: 'feature',
-                    subCategory: 'id',
-                    query: query,
-                    resource: 'starts_with',
-                    params: {
-                        of: 'json'
-                    },
-                    async: false,
-                    success: function (data, textStatus, jqXHR) {
-                        for (var i in data[0]) {
-                            results.push(data[0][i].displayId);
-                        }
-                    }
-                });
-                return results;
-            };
+        function callCellBase(query, callback) {
+            CellBaseManager.get({
+                species: _this.species,
+                version: 'v3',
+                category: 'feature',
+                subCategory: 'id',
+                query: query,
+                resource: 'starts_with',
+                params: {
+                    of: 'json'
+                },
+                success: callback
+            });
         }
 
+        var quickSearchResultFn = function (query, callback) {
+            callCellBase(query, function (data, textStatus, jqXHR) {
+                // console.log(data);
+                callback(data.response[0]);
+            });
+        };
+
         var goFeature = function (featureName) {
-            if (featureName != null) {
+
+            function goRegion (regionorg) {
+                var region = new Region(regionorg);
+                region = _this._adjustRegion(region);
+                _this.trigger('region:change', { region: region, sender: _this });
+            }
+
+            if (_.isString(featureName)) {
                 if (featureName.slice(0, "rs".length) == "rs" ||
                     featureName.slice(0, "AFFY_".length) == "AFFY_" ||
                     featureName.slice(0, "SNP_".length) == "SNP_" ||
@@ -338,25 +340,18 @@ GenomeViewer.prototype = {
 
                     this.openSNPListWidget(featureName);
                 } else {
-                    console.log(featureName);
-                    CellBaseManager.get({
-                        species: _this.species,
-                        category: 'feature',
-                        subCategory: 'gene',
-                        query: featureName,
-                        resource: 'info',
-                        params: {
-                            include: 'chromosome,start,end'
-                        },
-                        success: function (data) {
-                            var feat = data.response[0].result[0],
-                                regionStr = feat.chromosome + ":" + feat.start + "-" + feat.end,
-                                region = new Region(regionStr);
-                            region = _this._adjustRegion(region);
-                            _this.trigger('region:change', {region: region, sender: _this});
-                        }
+                    callCellBase(featureName, function (data) {
+                        var feat = data.response[0].result[0],
+                            regionStr = feat.chromosome + ":" + feat.start + "-" + feat.end;
+                        goRegion(regionStr);
                     });
                 }
+            } else if (_.isObject(featureName) &&
+                       !_.isUndefined(featureName.chromosome)) {
+                var region = new Region(featureName.chromosome + ":" +
+                                        featureName.start + "-" +
+                                        featureName.end);
+                goRegion(region);
             }
         };
 
@@ -368,7 +363,7 @@ GenomeViewer.prototype = {
             width: this.width,
             svgCanvasWidthOffset: this.trackPanelScrollWidth + this.sidePanelWidth,
             autoRender: true,
-            quickSearchResultFn: this.quickSearchResultFn,
+            quickSearchResultFn: quickSearchResultFn,
             quickSearchDisplayKey: this.quickSearchDisplayKey,
             componentsConfig: this.navigationBarConfig.componentsConfig,
             handlers: {

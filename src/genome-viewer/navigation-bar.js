@@ -301,11 +301,13 @@ NavigationBar.prototype = {
         var lastQuery = '';
         $(this.searchField).bind("keyup", function (event) {
             var query = $(this).val();
-            if (query.length > 2 && lastQuery !== query && event.which !== 13) {
+            if (query.length > 2 && _this.quickSearchDisplayKey !== query &&
+                event.which != 13) {
+
                 _this._setQuickSearchMenu(query);
-                lastQuery = query;
+                _this.quickSearchDisplayKey = query;
             }
-            if (event.which === 13) {
+            if (event.which == 13) {
                 var item = _this.quickSearchDataset[query];
                 _this.trigger('quickSearch:select', {item: item, sender: _this});
             }
@@ -313,7 +315,7 @@ NavigationBar.prototype = {
 
         $(this.quickSearchButton).click(function () {
             var query = $(_this.searchField).val();
-            var item = _this.quickSearchDataset[query];
+            var item = _this.quickSearchDataset[query] || query;
             _this.trigger('quickSearch:go', {item: item, sender: _this});
         });
 
@@ -337,20 +339,26 @@ NavigationBar.prototype = {
     },
 
     _setQuickSearchMenu: function (query) {
-        if (typeof this.quickSearchResultFn === 'function') {
+        if (_.isFunction(this.quickSearchResultFn)) {
+            var _this = this;
             $(this.searchDataList).empty();
             this.quickSearchDataset = {};
-            var items = this.quickSearchResultFn(query);
-            for (var i = 0; i < items.length; i++) {
-                var item = items[i];
-                var itemKey = item;
-                if ($.type(this.quickSearchDisplayKey) === "string") {
-                    itemKey = item[this.quickSearchDisplayKey];
+            this.quickSearchResultFn(query, function (data) {
+                var items = data.result;
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    _this.quickSearchDataset[item.name] = item;
+                    _this.quickSearchDataset[item.id] = item;
+
+                    if (i == 0 &&
+                        (item.name.indexOf(query) == 0 || item.id.indexOf(query) == 0)) {
+                        _this.quickSearchDataset[query] = item;
+                    }
+
+                    var menuEntry = $('<option value="' + item.id + '">')[0];
+                    $(_this.searchDataList).append(menuEntry);
                 }
-                this.quickSearchDataset[itemKey] = item;
-                var menuEntry = $('<option value="' + itemKey + '">')[0];
-                $(this.searchDataList).append(menuEntry);
-            }
+            });
         } else {
             console.warn('quickSearchResultFn function is not valid');
         }
