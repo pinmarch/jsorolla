@@ -639,7 +639,7 @@ function readBamRecords(ba, offset, sink, min, max, chrId, opts) {
         var record = new BamRecord();
 
         var refID = readInt(ba, offset + 4);
-        var pos = readInt(ba, offset + 8);
+        var pos = readInt(ba, offset + 8) + 1;
         
         var bmn = readInt(ba, offset + 12);
         var bin = (bmn & 0xffff0000) >> 16;
@@ -649,14 +649,14 @@ function readBamRecords(ba, offset, sink, min, max, chrId, opts) {
         var flag_nc = readInt(ba, offset + 16);
         var flag = (flag_nc & 0xffff0000) >> 16;
         var nc = flag_nc & 0xffff;
-    
+
         var lseq = readInt(ba, offset + 20);
-        
+
         var nextRef  = readInt(ba, offset + 24);
-        var nextPos = readInt(ba, offset + 28);
-        
+        var nextPos = readInt(ba, offset + 28) + 1;
+
         var tlen = readInt(ba, offset + 32);
-    
+
         record.segment = refID; // this.indexToChr[refID];
         record.flags = flag;
         record.start = pos;
